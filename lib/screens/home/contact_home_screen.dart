@@ -128,16 +128,15 @@ class _ContactHomeScreenState extends State<ContactHomeScreen> {
           child: Column(
             children: [
               Expanded(
-                child:
-                StreamBuilder(
-
+                child: StreamBuilder(
                     stream: FirebaseFirestore.instance
                         .collection('users')
                         .doc(FirebaseAuth.instance.currentUser!.uid)
                         .snapshots(),
                     builder: (context, snapshot) {
                       if (snapshot.hasData) {
-                        List myContacts = snapshot.data!.data()!['my_contacts'];
+                        List myContacts =
+                            snapshot.data!.data()!['my_contacts'] ?? [];
 
                         return StreamBuilder(
                           stream: FirebaseFirestore.instance
@@ -147,6 +146,11 @@ class _ContactHomeScreenState extends State<ContactHomeScreen> {
                                       myContacts.isEmpty ? [''] : myContacts)
                               .snapshots(),
                           builder: (context, snapshot) {
+                            if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                              return const Center(
+                                child: Text('No Contacts available.'),
+                              );
+                            }
                             if (snapshot.hasData) {
                               List<ChatUser> itemContacts = snapshot.data!.docs
                                   .map(

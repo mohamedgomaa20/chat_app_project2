@@ -1,6 +1,7 @@
 import 'package:chat_app_project/models/message_model.dart';
 import 'package:chat_app_project/models/room_model.dart';
 import 'package:chat_app_project/models/user_model.dart';
+import 'package:chat_app_project/utils/date_time.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -44,14 +45,54 @@ class ChatCard extends StatelessWidget {
               ),
             ),
             leading: chatUser.image == ""
-                ? CircleAvatar(
-                    radius: 30,
-                    child: Text(chatUser.name!.characters.first),
-                  )
-                : CircleAvatar(
-                    radius: 30,
-                    backgroundImage: NetworkImage(chatUser.image!),
-                  ),
+                ? chatUser.online!
+                    ? Stack(
+                        children: [
+                          CircleAvatar(
+                            radius: 30,
+                            child: Text(chatUser.name!.characters.first),
+                          ),
+                          const Positioned(
+                            right: 1,
+                            bottom: 4,
+                            child: CircleAvatar(
+                                radius: 7,
+                                backgroundColor: Colors.white,
+                                child: CircleAvatar(
+                                  radius: 5,
+                                  backgroundColor: Colors.green,
+                                )),
+                          ),
+                        ],
+                      )
+                    : CircleAvatar(
+                        radius: 30,
+                        child: Text(chatUser.name!.characters.first),
+                      )
+                : chatUser.online!
+                    ? Stack(
+                        children: [
+                          CircleAvatar(
+                            radius: 30,
+                            backgroundImage: NetworkImage(chatUser.image!),
+                          ),
+                          const Positioned(
+                            right: 1,
+                            bottom: 4,
+                            child: CircleAvatar(
+                                radius: 7,
+                                backgroundColor: Colors.white,
+                                child: CircleAvatar(
+                                  radius: 5,
+                                  backgroundColor: Colors.green,
+                                )),
+                          ),
+                        ],
+                      )
+                    : CircleAvatar(
+                        radius: 30,
+                        backgroundImage: NetworkImage(chatUser.image!),
+                      ),
             title: Text(
               // snapshot.data!.data()!['name'].toString(),
               chatUser.name!,
@@ -88,9 +129,17 @@ class ChatCard extends StatelessWidget {
                         label: Text(unReadList.length.toString()),
                         largeSize: 30,
                       )
-                    : Text(DateFormat('h:mm a').format(
-                        DateTime.fromMillisecondsSinceEpoch(
-                            int.parse(item.lastMessageTime!))));
+                    :
+
+                    Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                              '${myDateTime.dateAndTime(item.lastMessageTime!)}'),
+                          Text('${myDateTime.onlyTime(item.lastMessageTime!)}'),
+                        ],
+                      );
               },
             ),
           ));

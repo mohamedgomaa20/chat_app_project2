@@ -198,7 +198,10 @@ class FireData {
         .update({'name': newName, 'about': about});
   }
 
-  //  Content-Type: application/json
+
 
   sendNotification() {}
+
+
+
 }

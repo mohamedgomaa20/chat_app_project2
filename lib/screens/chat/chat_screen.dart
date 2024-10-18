@@ -5,6 +5,7 @@ import 'package:chat_app_project/firebase/fire_storage.dart';
 import 'package:chat_app_project/models/message_model.dart';
 import 'package:chat_app_project/models/user_model.dart';
 import 'package:chat_app_project/screens/chat/widgets/chat_message_card.dart';
+import 'package:chat_app_project/utils/date_time.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -37,11 +38,24 @@ class _ChatScreenState extends State<ChatScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(widget.chatUser.name!),
-            // Text(
-            //   widget.chatUser.lastActivated!,
-            //   style: Theme.of(context).textTheme.labelLarge,
-            // ),
-            Text("Online",style: Theme.of(context).textTheme.labelLarge,)
+            StreamBuilder(
+              stream: FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(widget.chatUser.id)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  return Text(
+                    snapshot.data!.data()!['online']!
+                        ? "online"
+                        : "Last Seen ${myDateTime.dateAndTime(widget.chatUser.lastActivated!)} at ${myDateTime.onlyTime(widget.chatUser.lastActivated!)}",
+                    style: Theme.of(context).textTheme.labelLarge,
+                  );
+                } else {
+                  return Container();
+                }
+              },
+            )
           ],
         ),
         actions: [
@@ -162,6 +176,31 @@ class _ChatScreenState extends State<ChatScreen> {
                                 );
                               }
 
+                              // Today or Yesterday or any date
+
+                              String newDate = '';
+                              bool isSameDate = false;
+
+                              if ((index == 0&& messageList.length==1) ||
+                                  index == messageList.length - 1) {
+                                newDate = myDateTime
+                                    .dateAndTime(messageList[index].createdAt!);
+                              } else {
+                                final DateTime dateThisMsg = myDateTime
+                                    .dateFormat(messageList[index].createdAt!);
+                                final DateTime datePreviousMsg =
+                                    myDateTime.dateFormat(
+                                        messageList[index + 1].createdAt!);
+
+                                isSameDate = dateThisMsg
+                                    .isAtSameMomentAs(datePreviousMsg);
+                                print(isSameDate);
+                                newDate = isSameDate
+                                    ? ""
+                                    : myDateTime.dateAndTime(
+                                        messageList[index].createdAt!);
+                              }
+
                               return GestureDetector(
                                 onTap: () {
                                   setState(() {
@@ -204,11 +243,19 @@ class _ChatScreenState extends State<ChatScreen> {
                                     print(copyMsg);
                                   });
                                 },
-                                child: ChatMessageCard(
-                                  selected: selectedMsg
-                                      .contains(messageList[index].id),
-                                  roomId: widget.roomId,
-                                  message: message,
+                                child: Column(
+                                  children: [
+                                    if (newDate != "")
+                                      Center(
+                                        child: Text(newDate),
+                                      ),
+                                    ChatMessageCard(
+                                      selected: selectedMsg
+                                          .contains(messageList[index].id),
+                                      roomId: widget.roomId,
+                                      message: message,
+                                    ),
+                                  ],
                                 ),
                               );
                             },

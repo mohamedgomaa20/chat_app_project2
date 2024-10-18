@@ -38,4 +38,14 @@ class FireAuth {
         .doc(FirebaseAuth.instance.currentUser!.uid)
         .update({'push_token': token});
   }
+
+  Future updateActivate({
+    required bool online,
+  }) async {
+    User? user = FirebaseAuth.instance.currentUser;
+    firestore.collection('users').doc(user!.uid).update({
+      'online': online,
+      'last_activated': DateTime.now().millisecondsSinceEpoch.toString(),
+    });
+  }
 }
