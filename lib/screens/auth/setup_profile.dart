@@ -45,10 +45,10 @@ class _SetupProfileState extends State<SetupProfile> {
                   "Welcome,",
                   style: Theme.of(context).textTheme.displayMedium,
                 ),
-                Text(
-                  "Chat App With Mohamed Gomaa",
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
+                // Text(
+                //   "Chat App With Mohamed Gomaa",
+                //   style: Theme.of(context).textTheme.bodyLarge,
+                // ),
                 const SizedBox(
                   height: 16,
                 ),

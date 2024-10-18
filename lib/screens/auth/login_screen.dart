@@ -2,7 +2,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:provider/provider.dart';
 
+import '../../layout.dart';
+import '../../provider/provider.dart';
 import '../../utils/colors.dart';
 import '../../widgets/logo.dart';
 import '../../widgets/text_field.dart';
@@ -33,7 +36,7 @@ class _LoginScreenState extends State<LoginScreen> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               // const LogoApp(),
-              Gap(50),
+              const Gap(50),
               Image.asset(
                 "assets/te2.png",
                 height: 150,
@@ -90,20 +93,21 @@ class _LoginScreenState extends State<LoginScreen> {
                     ElevatedButton(
                       onPressed: () async {
                         if (formKey.currentState!.validate()) {
-                          await FirebaseAuth.instance
-                              .signInWithEmailAndPassword(
-                                  email: emailCon.text, password: passCon.text)
-                              .then(
-                            (value) {
-                              print("---------- Login Done -------------");
-                            },
-                          ).onError(
-                            (error, stackTrace) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text(error.toString())),
-                              );
-                            },
-                          );
+                          signIn(email: emailCon.text, password: passCon.text);
+                          // await FirebaseAuth.instance
+                          //     .signInWithEmailAndPassword(
+                          //         email: emailCon.text, password: passCon.text)
+                          //     .then(
+                          //   (value) {
+                          //     print("---------- Login Done -------------");
+                          //   },
+                          // ).onError(
+                          //   (error, stackTrace) {
+                          //     ScaffoldMessenger.of(context).showSnackBar(
+                          //       SnackBar(content: Text(error.toString())),
+                          //     );
+                          //   },
+                          // );
                         }
                       },
                       style: ElevatedButton.styleFrom(
@@ -197,4 +201,40 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
+
+  Future signIn({required String email, required String password}) async {
+    try {
+      UserCredential userCredential =
+          await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      Navigator.pushReplacement(
+          context, MaterialPageRoute(builder: (context) => LayoutApp()));
+    } catch (e) {
+      print("Failed to log in: $e");
+    }
+  }
+
+// Future<void> createAccount(String email, String password, String name) async {
+//   try {
+//     UserCredential userCredential =
+//         await FirebaseAuth.instance.createUserWithEmailAndPassword(
+//       email: email,
+//       password: password,
+//     );
+//
+//     await userCredential.user?.updateProfile(displayName: name);
+//
+//     Provider.of<ProviderApp>(context, listen: false)
+//         .setUser(userCredential.user);
+//
+//     Navigator.pushReplacement(
+//       context,
+//       MaterialPageRoute(builder: (context) => LayoutApp()),
+//     );
+//   } catch (e) {
+//     print("Failed to create account: $e");
+//   }
+// }
 }

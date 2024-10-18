@@ -1,29 +1,3 @@
-// import 'package:chat_app_project/models/user_model.dart';
-// import 'package:cloud_firestore/cloud_firestore.dart';
-// import 'package:firebase_auth/firebase_auth.dart';
-//
-// class FireAuth {
-//   //static FirebaseAuth auth = FirebaseAuth.instance;
-//   //static User user = auth.currentUser!;
-//
-//   static User user = FirebaseAuth.instance.currentUser!;
-//   static FirebaseFirestore firestore = FirebaseFirestore.instance;
-//
-//   static Future createUser() async {
-//     ChatUser chatUser = ChatUser(
-//       id: user.uid,
-//       name: user.displayName ?? "",
-//       email: user.email ?? "",
-//       about: "hello i'm a new user",
-//       image: "",
-//       online: true,
-//       pushToken: "",
-//       lastActivated: DateTime.now().toString(),
-//       createdAt: DateTime.now().toString(),
-//     );
-//     await firestore.collection('users').doc(user.uid).set(chatUser.toJson());
-//   }
-// }
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -56,5 +30,12 @@ class FireAuth {
     } else {
       print("Error: No user is currently logged in.");
     }
+  }
+
+  Future getToken(String token) async {
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .update({'push_token': token});
   }
 }

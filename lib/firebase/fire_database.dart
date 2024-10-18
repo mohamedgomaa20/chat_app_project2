@@ -197,4 +197,8 @@ class FireData {
         .doc(myId)
         .update({'name': newName, 'about': about});
   }
+
+  //  Content-Type: application/json
+
+  sendNotification() {}
 }

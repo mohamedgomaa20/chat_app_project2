@@ -1,6 +1,8 @@
+import 'package:chat_app_project/firebase/fire_auth.dart';
 import 'package:chat_app_project/models/user_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -12,9 +14,18 @@ class ProviderApp with ChangeNotifier {
 
   getUserDetails() async {
     String myId = FirebaseAuth.instance.currentUser!.uid;
-    await FirebaseFirestore.instance.collection('users').doc(myId).get().then(
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(myId)
+        .get()
+        .then((value) => me = ChatUser.fromJson(value.data()!));
+    FirebaseMessaging.instance.requestPermission();
+    await FirebaseMessaging.instance.getToken().then(
       (value) {
-        me = ChatUser.fromJson(value.data()!);
+        if (value != null) {
+          me!.pushToken = value;
+          FireAuth().getToken(value);
+        }
       },
     );
     notifyListeners();

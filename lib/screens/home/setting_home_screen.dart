@@ -1,5 +1,6 @@
 import 'package:chat_app_project/provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:iconsax/iconsax.dart';
@@ -23,6 +24,16 @@ class _SettingHomeScreenState extends State<SettingHomeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Settings"),
+      ),
+      floatingActionButton: FloatingActionButton(onPressed: () {
+        FirebaseMessaging.instance.requestPermission();
+        FirebaseMessaging.instance.getToken().then((value) {
+          print(value);
+
+        },);
+
+      }
+
       ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),

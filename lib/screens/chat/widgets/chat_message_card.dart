@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chat_app_project/models/message_model.dart';
+import 'package:chat_app_project/utils/photo_view.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -72,16 +73,25 @@ class _ChatMessageCardState extends State<ChatMessageCard> {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     widget.message.type == 'image'
-                        ? Container(
-                            // child: Image.network(message.msg.toString()) ,
-                            child: CachedNetworkImage(
-                              imageUrl: widget.message.msg.toString(),
-                              placeholder: (context, url) {
-                                return Container(
-                                  height: 100,
-                                );
-                              },
+                        ? GestureDetector(
+                            child: Container(
+                              // child: Image.network(message.msg.toString()) ,
+                              child: CachedNetworkImage(
+                                imageUrl: widget.message.msg.toString(),
+                                placeholder: (context, url) {
+                                  return Container(
+                                    height: 100,
+                                  );
+                                },
+                              ),
                             ),
+                            onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => PhotoViewScreen(
+                                    image: widget.message.msg!,
+                                  ),
+                                )),
                           )
                         : Text(widget.message.msg.toString()),
                     const Gap(5),
