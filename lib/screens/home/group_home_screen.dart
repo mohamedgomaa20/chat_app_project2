@@ -48,6 +48,7 @@ class _GroupHomeScreenState extends State<GroupHomeScreen> {
                         return const Center(
                           child: CircularProgressIndicator(),
                         );
+                        //
                       }
                       if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                         return const Center(
