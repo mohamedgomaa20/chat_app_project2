@@ -153,9 +153,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 child: ListTile(
                     leading: Icon(Iconsax.timer_1),
                     title: const Text("Joined On"),
-                    subtitle: Text(myDateTime.dateAndTime(me!.createdAt!) +
-                        ' at ' +
-                        myDateTime.onlyTime(me!.createdAt!))),
+                    subtitle: Text('${myDateTime.dateAndTime(me!.createdAt!)} at ${myDateTime.onlyTime(me!.createdAt!)}')),
               ),
               const SizedBox(
                 height: 20,

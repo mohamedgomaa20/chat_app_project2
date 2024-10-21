@@ -53,7 +53,7 @@ class _ChatScreenState extends State<ChatScreen> {
       child: Scaffold(
         appBar: AppBar(
           automaticallyImplyLeading: false,
-          title: Row(
+          title:       selectedMsg.isEmpty? Row(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
@@ -64,8 +64,8 @@ class _ChatScreenState extends State<ChatScreen> {
                   },
                   child: const Icon(Icons.arrow_back)),
               const Gap(5),
-              selectedMsg.isEmpty
-                  ? StreamBuilder(
+
+                 StreamBuilder(
                       stream: FirebaseFirestore.instance
                           .collection('users')
                           .doc(widget.chatUser.id)
@@ -109,9 +109,13 @@ class _ChatScreenState extends State<ChatScreen> {
                         }
                       },
                     )
-                  : Container()
+
             ],
-          ),
+          ): InkWell(
+              onTap: () {
+                Navigator.pop(context);
+              },
+              child: const Icon(Icons.close)),
           actions: [
             Row(
               children: [

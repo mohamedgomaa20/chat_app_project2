@@ -198,30 +198,3 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     });
   }
 }
-
-/*
-                      ElevatedButton(
-                        onPressed: () async {
-                          if (formKey.currentState!.validate()) {
-                            register(
-                                    email: emailCon.text,
-                                    password: passCon.text)
-                                .then(
-                              (value) {},
-                            );
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12)),
-                          backgroundColor: kPrimaryColor,
-                          padding: const EdgeInsets.all(16),
-                        ),
-                        child: Center(
-                          child: Text(
-                            "Register".toUpperCase(),
-                            style: const TextStyle(color: Colors.black),
-                          ),
-                        ),
-                      )
- */

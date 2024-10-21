@@ -13,7 +13,7 @@ class _QrCodeScreenState extends State<QrCodeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("QR Code"),
+        title: const Text("QR Code"),
       ),
       body: Center(
         child: SingleChildScrollView(
