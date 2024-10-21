@@ -2,13 +2,16 @@ import 'package:chat_app_project/models/group_model.dart';
 import 'package:chat_app_project/utils/date_time.dart';
 import 'package:flutter/material.dart';
 
-
 import '../group_screen.dart';
 
 class GroupCard extends StatelessWidget {
- final ChatGroup chatGroup;
+  final ChatGroup chatGroup;
 
- const GroupCard({super.key, required this.chatGroup});
+  const GroupCard({super.key, required this.chatGroup});
+
+  bool isArabic(String text) {
+    return RegExp(r'[\u0600-\u06FF]').hasMatch(text);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,10 +40,11 @@ class GroupCard extends StatelessWidget {
                 chatGroup.lastMessage.toString(),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
+                textDirection: isArabic(chatGroup.lastMessage.toString())
+                    ? TextDirection.rtl
+                    : TextDirection.ltr,
               ),
-        trailing:
-            // Text(chatGroup.lastMessageTime!),
-            Text(myDateTime.onlyTime(chatGroup.lastMessageTime!)),
+        trailing: Text(MyDateTime.onlyTime(chatGroup.lastMessageTime!)),
       ),
     );
   }

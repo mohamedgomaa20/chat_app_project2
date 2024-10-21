@@ -1,3 +1,4 @@
+import 'package:chat_app_project/utils/show_snack_bar.dart';
 import 'package:chat_app_project/widgets/text_form_field.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -13,7 +14,7 @@ import '../../utils/constants.dart';
 import '../../widgets/custom_elevated_button.dart';
 import '../../widgets/logo_app.dart';
 
-import 'forget_screen.dart';
+
 
 class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({super.key});
@@ -82,27 +83,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                         prefixIcon: Iconsax.password_check,
                         isPassword: true,
                       ),
-                      const SizedBox(
-                        height: 16,
-                      ),
-                      Row(
-                        children: [
-                          const Spacer(),
-                          GestureDetector(
-                            child: const Text("Forget Password?"),
-                            onTap: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => const ForgetScreen(),
-                                  ));
-                            },
-                          )
-                        ],
-                      ),
-                      const SizedBox(
-                        height: 16,
-                      ),
+                      const Gap(16),
                       CustomElevatedButton(
                         text: 'Register',
                         onPressed: () async {
@@ -191,37 +172,11 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             content: Text('Too many requests: Please try again later.')));
       }
     } catch (e) {
-      print("Failed to log in: $e");
+      showSnackBar(context: context, message: "An unexpected error occurred.");
+
     }
     setState(() {
       isLoading = false;
     });
   }
 }
-
-/*
-                      ElevatedButton(
-                        onPressed: () async {
-                          if (formKey.currentState!.validate()) {
-                            register(
-                                    email: emailCon.text,
-                                    password: passCon.text)
-                                .then(
-                              (value) {},
-                            );
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12)),
-                          backgroundColor: kPrimaryColor,
-                          padding: const EdgeInsets.all(16),
-                        ),
-                        child: Center(
-                          child: Text(
-                            "Register".toUpperCase(),
-                            style: const TextStyle(color: Colors.black),
-                          ),
-                        ),
-                      )
- */

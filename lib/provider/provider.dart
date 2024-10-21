@@ -19,12 +19,14 @@ class ProviderApp with ChangeNotifier {
         .doc(myId)
         .get()
         .then((value) => me = ChatUser.fromJson(value.data()!));
+
     FirebaseMessaging.instance.requestPermission();
+
     await FirebaseMessaging.instance.getToken().then(
       (value) {
         if (value != null) {
           me!.pushToken = value;
-          FireAuth().getToken(value);
+          FireAuth().updateToken(value);
         }
       },
     );
@@ -34,25 +36,33 @@ class ProviderApp with ChangeNotifier {
   changeMode(bool dark) async {
     final SharedPreferences sharedPreferences =
         await SharedPreferences.getInstance();
+
     themeMode = dark ? ThemeMode.dark : ThemeMode.light;
     sharedPreferences.setBool('dark', themeMode == ThemeMode.dark);
+
     notifyListeners();
   }
 
   changeColor(int color) async {
     final SharedPreferences sharedPreferences =
         await SharedPreferences.getInstance();
+
     mainColor = color;
     sharedPreferences.setInt('color', mainColor);
+
     notifyListeners();
   }
 
   getValuesFromPref() async {
     final SharedPreferences sharedPreferences =
         await SharedPreferences.getInstance();
+
     bool isDark = sharedPreferences.getBool('dark') ?? false;
+
     themeMode = isDark ? ThemeMode.dark : ThemeMode.light;
+
     mainColor = sharedPreferences.getInt('color') ?? 0xffF44336;
+
     notifyListeners();
   }
 }

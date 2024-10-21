@@ -9,6 +9,7 @@ class CustomTextFormField extends StatefulWidget {
   final IconData? prefixIcon;
   final TextEditingController controller;
   final bool isPassword;
+  final bool autofocus;
   final TextInputType? keyboardType;
 
   const CustomTextFormField({
@@ -18,6 +19,7 @@ class CustomTextFormField extends StatefulWidget {
     required this.controller,
     this.isPassword = false,
     this.keyboardType,
+    this.autofocus=false,
   });
 
   @override
@@ -32,6 +34,7 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
     return Padding(
       padding: const EdgeInsets.only(top: 16),
       child: TextFormField(
+        autofocus: widget.autofocus ,
         controller: widget.controller,
         keyboardType: widget.keyboardType,
         obscureText: widget.isPassword ? obscure : false,
@@ -69,64 +72,3 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
     );
   }
 }
-
-/*
-// import 'package:flutter/material.dart';
-// import 'package:iconsax/iconsax.dart';
-//
-// import '../utils/colors.dart';
-//
-// class CustomField extends StatefulWidget {
-//   final IconData icon;
-//   final String label;
-//   final TextEditingController controller;
-//   final bool isPass;
-//
-//   const CustomField({
-//     super.key,
-//     required this.icon,
-//     required this.label,
-//     required this.controller,
-//     this.isPass = false,
-//   });
-//
-//   @override
-//   State<CustomField> createState() => _CustomFieldState();
-// }
-//
-// class _CustomFieldState extends State<CustomField> {
-//   bool obscure = true;
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Padding(
-//       padding: const EdgeInsets.only(top: 16),
-//       child: TextFormField(
-//         validator: (value) => value!.isEmpty ? "Required" : null,
-//         obscureText: widget.isPass ? obscure : false,
-//         controller: widget.controller,
-//         // autofocus: true,
-//         decoration: InputDecoration(
-//           suffixIcon: widget.isPass
-//               ? IconButton(
-//                   onPressed: () {
-//                     setState(() {
-//                       obscure = !obscure;
-//                     });
-//                   },
-//                   icon: const Icon(Iconsax.eye))
-//               : const SizedBox(),
-//           contentPadding: const EdgeInsets.all(16),
-//           focusedBorder: OutlineInputBorder(
-//               borderRadius: BorderRadius.circular(12),
-//               borderSide: BorderSide(color: kPrimaryColor)),
-//           labelText: widget.label,
-//           prefixIcon: Icon(widget.icon),
-//           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-//         ),
-//       ),
-//     );
-//   }
-// }
-
- */

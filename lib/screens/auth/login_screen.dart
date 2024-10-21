@@ -23,12 +23,11 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
-final formKey = GlobalKey<FormState>();
-
 class _LoginScreenState extends State<LoginScreen> {
   TextEditingController emailCon = TextEditingController();
   TextEditingController passCon = TextEditingController();
   bool isLoading = false;
+  final formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -94,7 +93,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         text: 'Login',
                         onPressed: () async {
                           if (formKey.currentState!.validate()) {
-                            signIn(email: emailCon.text, password: passCon.text)
+                            login(email: emailCon.text, password: passCon.text)
                                 .then(
                               (value) {
                                 setState(() {
@@ -132,7 +131,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Future signIn({required String email, required String password}) async {
+  Future login({required String email, required String password}) async {
     try {
       setState(() {
         isLoading = true;
@@ -176,7 +175,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 'Network error: Please check your connection and try again.');
       }
     } catch (e) {
-      print("Failed to log in: $e");
+      showSnackBar(context: context, message: "An unexpected error occurred.");
+
     }
     setState(() {
       isLoading = false;

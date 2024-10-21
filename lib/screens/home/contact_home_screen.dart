@@ -1,14 +1,15 @@
 import 'package:chat_app_project/firebase/fire_database.dart';
 import 'package:chat_app_project/models/user_model.dart';
 import 'package:chat_app_project/screens/contacts/contact_card.dart';
-import 'package:chat_app_project/widgets/custom_elevated_button.dart';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 
 import '../../utils/constants.dart';
-import '../../widgets/text_form_field.dart';
+
+import 'bottom_sheet.dart';
 
 class ContactHomeScreen extends StatefulWidget {
   const ContactHomeScreen({super.key});
@@ -71,53 +72,41 @@ class _ContactHomeScreenState extends State<ContactHomeScreen> {
           showBottomSheet(
             context: context,
             builder: (context) {
-              return Container(
-                padding: const EdgeInsets.all(kPadding),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Row(
-                      children: [
-                        Text(
-                          "Enter Friend Email",
-                          style: Theme.of(context).textTheme.bodyLarge,
-                        ),
-                        const Spacer(),
-                        IconButton.filled(
-                          onPressed: () {},
-                          icon: const Icon(Iconsax.scan_barcode),
-                        )
-                      ],
-                    ),
-                    CustomTextFormField(
-                      controller: emailCon,
-                      prefixIcon: Iconsax.direct,
-                      label: "Email",
-                      keyboardType: TextInputType.emailAddress,
-                    ),
-                    const SizedBox(
-                      height: 16,
-                    ),
-                    CustomElevatedButton(
-                      text: "Add Contact",
-                      onPressed: () async {
-                        await FireData().addContact(emailCon.text).then(
-                          (value) {
-                            setState(() {
-                              emailCon.clear();
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                      content:
-                                          Text("Contact added successfully")));
-                              Navigator.pop(context);
-                            });
-                          },
-                        );
+              return CreateBottomSheet(
+                txtOfButton: "Add Contat",
+                onPressed: () async {
+                  QuerySnapshot friendEmail = await FirebaseFirestore.instance
+                      .collection('users')
+                      .where('email', isEqualTo: emailCon.text)
+                      .get();
+
+                  if (friendEmail.docs.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content: Text("This email does not exist")),
+                    );
+                  } else {
+                    await FireData().addContact(emailCon.text).then(
+                      (value) {
+                        setState(() {
+                          emailCon.clear();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content: Text("Contact added successfully")));
+                          Navigator.pop(context);
+                        });
                       },
-                    )
-                  ],
-                ),
+                    ).onError((error, stackTrace) {
+                      print("----------------- Some Error ----------------");
+                    });
+                  }
+                },
+                controller: emailCon,
               );
+            },
+          ).closed.then(
+            (value) {
+              emailCon.clear();
             },
           );
         },
@@ -135,7 +124,7 @@ class _ContactHomeScreenState extends State<ContactHomeScreen> {
                         .snapshots(),
                     builder: (context, snapshot) {
                       if (snapshot.hasData) {
-                        List myContacts =
+                        myContacts =
                             snapshot.data!.data()!['my_contacts'] ?? [];
 
                         return StreamBuilder(

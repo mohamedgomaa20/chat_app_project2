@@ -1,6 +1,6 @@
 import 'package:intl/intl.dart';
 
-class myDateTime {
+class MyDateTime {
   static DateTime dateFormat(String time) {
     var dateTime = DateTime.fromMillisecondsSinceEpoch(int.parse(time));
 

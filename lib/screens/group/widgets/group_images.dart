@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:image_picker/image_picker.dart';
+
 
 import '../../../widgets/text_form_field.dart';
 
@@ -11,11 +11,11 @@ class GroupHeader extends StatelessWidget {
   final Function() onImagePick;
 
   const GroupHeader({
-    Key? key,
+    super.key,
     required this.groupName,
     required this.groupImage,
     required this.onImagePick,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

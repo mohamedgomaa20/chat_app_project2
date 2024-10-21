@@ -26,19 +26,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
   List<String> gMembers = [];
   String _groupImage = '';
   bool isLoading = false;
-  File? _selectedImage;
-
-  Future<void> _pickImage() async {
-    final pickedFile =
-        await ImagePicker().pickImage(source: ImageSource.gallery);
-
-    if (pickedFile != null) {
-      setState(() {
-        _selectedImage = File(pickedFile.path);
-      });
-    }
-  }
-
+ 
   @override
   Widget build(BuildContext context) {
     return ModalProgressHUD(
@@ -200,16 +188,26 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                                       child: CheckboxListTile(
                                         checkboxShape: const CircleBorder(),
                                         title: ListTile(
-                                          leading: CircleAvatar(
-                                            child: Text(itemContacts[index]
-                                                .name!
-                                                .characters
-                                                .first),
-                                          ),
-                                          title: Text(itemContacts[index]
-                                              .name
-                                              .toString()),
-                                        ),
+                                            leading: itemContacts[index]
+                                                        .image ==
+                                                    ""
+                                                ? const CircleAvatar(
+                                                    radius: 30,
+                                                    child: Icon(Iconsax.user),
+                                                  )
+                                                : CircleAvatar(
+                                                    radius: 30,
+                                                    backgroundImage:
+                                                        NetworkImage(
+                                                            itemContacts[index]
+                                                                .image!),
+                                                  ),
+                                            title: Text(itemContacts[index]
+                                                .name
+                                                .toString()),
+                                            subtitle: Text(itemContacts[index]
+                                                .email
+                                                .toString())),
                                         value: gMembers
                                             .contains(itemContacts[index].id),
                                         onChanged: (value) {

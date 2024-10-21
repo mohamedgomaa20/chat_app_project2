@@ -20,7 +20,7 @@ showAlertDialog({
           ),
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          contentPadding: EdgeInsets.all(10),
+          contentPadding: const EdgeInsets.all(10),
           content: SizedBox(
             width: 450,
             child: Padding(

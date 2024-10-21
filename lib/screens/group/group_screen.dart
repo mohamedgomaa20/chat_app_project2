@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:chat_app_project/firebase/fire_database.dart';
 import 'package:chat_app_project/models/group_model.dart';
-import 'package:chat_app_project/screens/chat/chat_screen.dart';
+
 import 'package:chat_app_project/screens/group/widgets/group_message_card.dart';
 import 'package:chat_app_project/utils/constants.dart';
 import 'package:chat_app_project/utils/show_snack_bar.dart';
@@ -70,69 +70,80 @@ class _GroupScreenState extends State<GroupScreen> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      InkWell(
-                        onTap: () {
-                          Navigator.pop(context);
-                        },
-                        child: const Icon(Icons.arrow_back),
-                      ),
-                      const Gap(5),
                       selectedMsg.isEmpty
                           ? Row(
                               children: [
-                                UserAvatar(
-                                  name: groupName,
-                                  imageUrl: snapshot.data!['image'],
-                                  online: false,
-                                  radius: 22,
-                                ),
-                                const Gap(10),
-                                StreamBuilder(
-                                  stream: FirebaseFirestore.instance
-                                      .collection('users')
-                                      .where('id', whereIn: members)
-                                      .snapshots(),
-                                  builder: (context, snapshot) {
-                                    if (snapshot.hasData) {
-                                      List<String> membersNames = [];
-                                      for (var userDoc in snapshot.data!.docs) {
-                                        membersNames.add(
-                                            userDoc['name'].split(' ').first);
-                                      }
-                                      return Container(
-                                        width: 150,
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              groupName,
-                                              style: const TextStyle(
-                                                  fontSize: 18,
-                                                  fontWeight: FontWeight.bold),
-                                            ),
-                                            Text(
-                                              membersNames.join(', '),
-                                              style: Theme.of(context)
-                                                  .textTheme
-                                                  .labelLarge,
-                                            ),
-                                          ],
-                                        ),
-                                      );
-                                    } else {
-                                      return Container();
-                                    }
+                                InkWell(
+                                  onTap: () {
+                                    Navigator.pop(context);
                                   },
+                                  child: const Icon(Icons.arrow_back),
                                 ),
+                                const Gap(5),
+                                Row(
+                                  children: [
+                                    UserAvatar(
+                                      name: groupName,
+                                      imageUrl: snapshot.data!['image'],
+                                      online: false,
+                                      radius: 22,
+                                    ),
+                                    const Gap(10),
+                                    StreamBuilder(
+                                      stream: FirebaseFirestore.instance
+                                          .collection('users')
+                                          .where('id', whereIn: members)
+                                          .snapshots(),
+                                      builder: (context, snapshot) {
+                                        if (snapshot.hasData) {
+                                          List<String> membersNames = [];
+                                          for (var userDoc
+                                              in snapshot.data!.docs) {
+                                            membersNames.add(userDoc['name']
+                                                .split(' ')
+                                                .first);
+                                          }
+                                          return Container(
+                                            width: 150,
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  groupName,
+                                                  style: const TextStyle(
+                                                      fontSize: 18,
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                ),
+                                                Text(
+                                                  membersNames.join(', '),
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .labelLarge,
+                                                ),
+                                              ],
+                                            ),
+                                          );
+                                        } else {
+                                          return Container();
+                                        }
+                                      },
+                                    ),
+                                  ],
+                                )
                               ],
                             )
-                          : Container(),
-                      Spacer(),
+                          : InkWell(
+                              onTap: () {
+                                Navigator.pop(context);
+                              },
+                              child: const Icon(Icons.close)),
+                      const Spacer(),
                       Expanded(
                         child: Row(
                           children: [
-                            Spacer(),
+                            const Spacer(),
                             selectedMsg.isEmpty && copyMsg.isEmpty
                                 ? IconButton(
                                     onPressed: () {
@@ -232,8 +243,6 @@ class _GroupScreenState extends State<GroupScreen> {
                   return Container();
                 }
               }),
-          // actions: [
-          // ],
         ),
         body: Padding(
           padding:
@@ -285,13 +294,13 @@ class _GroupScreenState extends State<GroupScreen> {
 
                             if ((index == 0 && messageList.length == 1) ||
                                 index == messageList.length - 1) {
-                              newDate = myDateTime
+                              newDate = MyDateTime
                                   .dateAndTime(messageList[index].createdAt!);
                             } else {
-                              final DateTime dateThisMsg = myDateTime
+                              final DateTime dateThisMsg = MyDateTime
                                   .dateFormat(messageList[index].createdAt!);
                               final DateTime datePreviousMsg =
-                                  myDateTime.dateFormat(
+                                  MyDateTime.dateFormat(
                                       messageList[index + 1].createdAt!);
 
                               isSameDate =
@@ -299,7 +308,7 @@ class _GroupScreenState extends State<GroupScreen> {
 
                               newDate = isSameDate
                                   ? ""
-                                  : myDateTime.dateAndTime(
+                                  : MyDateTime.dateAndTime(
                                       messageList[index].createdAt!);
                             }
 
@@ -371,7 +380,7 @@ class _GroupScreenState extends State<GroupScreen> {
                         );
                       } else {
                         return SayAssalamuAlaikum(onTap: () {
-                          FireData().sendGMessage(
+                          FireData().sendGroupMessage(
                             msg: "Assalamu Alaikum 👋",
                             groupId: widget.chatGroup.id!,
                           );
@@ -388,7 +397,7 @@ class _GroupScreenState extends State<GroupScreen> {
                   if (msgCon.text.trim().isNotEmpty) {
                     if (isEditing) {
                       FireData()
-                          .editMsgGroup(
+                          .editMessageGroup(
                         groupId: widget.chatGroup.id!,
                         messageId: editingMessageId!,
                         editMessage: msgCon.text.trim(),
@@ -406,7 +415,7 @@ class _GroupScreenState extends State<GroupScreen> {
                       });
                     } else {
                       await FireData()
-                          .sendGMessage(
+                          .sendGroupMessage(
                               msg: msgCon.text, groupId: widget.chatGroup.id!)
                           .then((value) {
                         msgCon.clear();
@@ -487,216 +496,3 @@ class _GroupScreenState extends State<GroupScreen> {
     );
   }
 }
-
-// import 'package:chat_app_project/firebase/fire_database.dart';
-// import 'package:chat_app_project/models/group_model.dart';
-// import 'package:chat_app_project/screens/group/widgets/group_message_card.dart';
-// import 'package:cloud_firestore/cloud_firestore.dart';
-// import 'package:flutter/material.dart';
-// import 'package:gap/gap.dart';
-// import 'package:iconsax/iconsax.dart';
-//
-// import '../../models/message_model.dart';
-// import '../../widgets/say_hello.dart';
-// import '../chat/widgets/user_avatar.dart';
-// import 'group_member.dart';
-//
-// class GroupScreen extends StatefulWidget {
-//   ChatGroup chatGroup;
-//
-//   GroupScreen({super.key, required this.chatGroup});
-//
-//   @override
-//   State<GroupScreen> createState() => _GroupScreenState();
-// }
-//
-// class _GroupScreenState extends State<GroupScreen> {
-//   TextEditingController msgCon = TextEditingController();
-//   ScrollController controller = ScrollController();
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         automaticallyImplyLeading: false,
-//         title: Row(
-//           mainAxisAlignment: MainAxisAlignment.start,
-//           crossAxisAlignment: CrossAxisAlignment.center,
-//           mainAxisSize: MainAxisSize.min,
-//           children: [
-//             InkWell(
-//                 onTap: () {
-//                   Navigator.pop(context);
-//                 },
-//                 child: const Icon(Icons.arrow_back)),
-//             const Gap(5),
-//             UserAvatar(
-//               name: widget.chatGroup.name!,
-//               imageUrl: widget.chatGroup.image!,
-//               online: false,
-//               radius: 22,
-//             ),
-//             const Gap(10),
-//             Container(
-//               width: 100,
-//               child: Column(
-//                 crossAxisAlignment: CrossAxisAlignment.start,
-//                 children: [
-//                   Text(widget.chatGroup.name!),
-//                   StreamBuilder(
-//                     stream: FirebaseFirestore.instance
-//                         .collection('groups')
-//                         .doc(widget.chatGroup.id)
-//                         .snapshots(),
-//                     builder: (context, snapshot) {
-//                       if (snapshot.hasData) {
-//                         List members = snapshot.data!['members'];
-//                         return StreamBuilder(
-//                           stream: FirebaseFirestore.instance
-//                               .collection('users')
-//                               .where('id', whereIn: members)
-//                               .snapshots(),
-//                           builder: (context, snapshot) {
-//                             if (snapshot.hasData) {
-//                               List membersName = [];
-//                               for (var userDoc in snapshot.data!.docs) {
-//                                 membersName.add(userDoc['name'].split(' '));
-//                               }
-//                               return Text(
-//                                 membersName.join(', '),
-//                                 style: Theme.of(context).textTheme.labelLarge,
-//                               );
-//                             } else {
-//                               return Container();
-//                             }
-//                           },
-//                         );
-//                       } else {
-//                         return Container();
-//                       }
-//                     },
-//                   ),
-//                 ],
-//               ),
-//             )
-//           ],
-//         ),
-//         actions: [
-//           IconButton(
-//             onPressed: () {
-//               Navigator.push(
-//                   context,
-//                   MaterialPageRoute(
-//                     builder: (context) =>
-//                         GroupMemberScreen(chatGroup: widget.chatGroup),
-//                   ));
-//             },
-//             icon: const Icon(Iconsax.user),
-//           ),
-//         ],
-//       ),
-//       body: Padding(
-//         padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 20),
-//         child: Column(
-//           children: [
-//             Expanded(
-//               child: StreamBuilder(
-//                 stream: FirebaseFirestore.instance
-//                     .collection('groups')
-//                     .doc(widget.chatGroup.id)
-//                     .collection('messages')
-//                     .snapshots(),
-//                 builder: (context, snapshot) {
-//                   if (snapshot.hasData) {
-//                     List<Message> messageList = snapshot.data!.docs
-//                         .map(
-//                           (e) => Message.fromJson(e.data()),
-//                         )
-//                         .toList()
-//                       ..sort(
-//                         (a, b) => b.createdAt!.compareTo(a.createdAt!),
-//                       );
-//                     if (messageList.isEmpty) {
-//                       return SayAssalamuAlaikum(onTap: () {
-//                         FireData().sendGMessage(
-//                           msg: "Assalamu Alaikum 👋",
-//                           groupId: widget.chatGroup.id!,
-//                         );
-//                       });
-//                     } else {
-//                       return ListView.builder(
-//                         reverse: true,
-//                         itemCount: messageList.length,
-//                         itemBuilder: (context, index) {
-//                           return GroupMessageCard(
-//                             index: index,
-//                             message: messageList[index],
-//                           );
-//                         },
-//                       );
-//                     }
-//                   } else {
-//                     return Container();
-//                   }
-//                 },
-//               ),
-//             ),
-//             Row(
-//               children: [
-//                 Expanded(
-//                   child: Card(
-//                     child: TextField(
-//                       maxLines: 5,
-//                       minLines: 1,
-//                       controller: msgCon,
-//                       decoration: InputDecoration(
-//                           suffixIcon: Row(
-//                             mainAxisAlignment: MainAxisAlignment.end,
-//                             mainAxisSize: MainAxisSize.min,
-//                             children: [
-//                               IconButton(
-//                                 onPressed: () {},
-//                                 icon: const Icon(Iconsax.emoji_happy),
-//                               ),
-//                               IconButton(
-//                                 onPressed: () {},
-//                                 icon: const Icon(Iconsax.camera),
-//                               ),
-//                             ],
-//                           ),
-//                           border: InputBorder.none,
-//                           hintText: "Message",
-//                           contentPadding: const EdgeInsets.symmetric(
-//                               horizontal: 16, vertical: 10)),
-//                     ),
-//                   ),
-//                 ),
-//                 IconButton.filled(
-//                     onPressed: () async {
-//                       if (msgCon.text.isNotEmpty) {
-//                         await FireData()
-//                             .sendGMessage(
-//                                 msg: msgCon.text, groupId: widget.chatGroup.id!)
-//                             .then(
-//                           (value) {
-//                             print("------------- send done ---------------");
-//                             setState(() {
-//                               msgCon.clear();
-//                             });
-//                           },
-//                         ).onError(
-//                           (error, stackTrace) {
-//                             print("------------- error ---------------");
-//                           },
-//                         );
-//                       }
-//                     },
-//                     icon: Icon(Iconsax.send_1))
-//               ],
-//             )
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-// }

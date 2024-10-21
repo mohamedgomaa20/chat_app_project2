@@ -14,6 +14,11 @@ class ChatCard extends StatelessWidget {
 
   const ChatCard({super.key, required this.item});
 
+  // Function to check if the text contains Arabic characters
+  bool isArabic(String text) {
+    return RegExp(r'[\u0600-\u06FF]').hasMatch(text);
+  }
+
   @override
   Widget build(BuildContext context) {
     List members = item.members!
@@ -59,6 +64,9 @@ class ChatCard extends StatelessWidget {
                     item.lastMessage.toString(),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
+                    textDirection: isArabic(item.lastMessage.toString())
+                        ? TextDirection.rtl
+                        : TextDirection.ltr,
                   )
                 : Text(chatUser.about!),
             trailing: StreamBuilder(
@@ -79,11 +87,10 @@ class ChatCard extends StatelessWidget {
                     [];
                 return unReadList.isNotEmpty
                     ? Badge(
-                        textStyle: TextStyle(fontSize: 16),
+                        textStyle: const TextStyle(fontSize: 16),
                         padding: const EdgeInsets.symmetric(horizontal: 5),
                         label: Text(unReadList.length.toString()),
                         largeSize: 25,
-                        // backgroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
                         backgroundColor:
                             Theme.of(context).colorScheme.onPrimaryContainer,
                       )
@@ -92,8 +99,8 @@ class ChatCard extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                              '${myDateTime.dateAndTime(item.lastMessageTime!)}'),
-                          Text('${myDateTime.onlyTime(item.lastMessageTime!)}'),
+                              MyDateTime.dateAndTime(item.lastMessageTime!)),
+                          Text(MyDateTime.onlyTime(item.lastMessageTime!)),
                         ],
                       );
               },

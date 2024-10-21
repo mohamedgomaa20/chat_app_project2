@@ -16,9 +16,9 @@ import '../../models/user_model.dart';
 import '../../widgets/text_form_field.dart';
 
 class EditGroupScreen extends StatefulWidget {
-  ChatGroup chatGroup;
+   ChatGroup chatGroup;
 
-  EditGroupScreen({super.key, required this.chatGroup});
+   EditGroupScreen({super.key, required this.chatGroup});
 
   @override
   State<EditGroupScreen> createState() => _EditGroupScreenState();
@@ -76,10 +76,10 @@ class _EditGroupScreenState extends State<EditGroupScreen> {
             }
 
             await FireData()
-                .editGroup(
+                .editInfoGroup(
               groupId: widget.chatGroup.id!,
-              newGName: gNameCon.text,
-              members: gMembers,
+              newGroupName: gNameCon.text,
+              membersId: gMembers,
             )
                 .then(
               (value) {
@@ -203,14 +203,21 @@ class _EditGroupScreenState extends State<EditGroupScreen> {
                                       child: CheckboxListTile(
                                         checkboxShape: const CircleBorder(),
                                         title: ListTile(
-                                          leading: CircleAvatar(
-                                            child: Text(itemContacts[index]
-                                                .name!
-                                                .characters
-                                                .first),
+                                          leading: itemContacts[index].image == ""
+                                              ? const CircleAvatar(
+                                            radius: 30,
+                                            child: Icon(Iconsax.user),
+                                          )
+                                              : CircleAvatar(
+                                            radius: 30,
+                                            backgroundImage: NetworkImage(
+                                                itemContacts[index].image!),
                                           ),
                                           title: Text(itemContacts[index]
                                               .name
+                                              .toString()),
+                                          subtitle: Text(itemContacts[index]
+                                              .email
                                               .toString()),
                                         ),
                                         value: gMembers

@@ -4,7 +4,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:intl/intl.dart';
 
 import '../../../models/message_model.dart';
 import '../../../utils/photo_view.dart';
@@ -16,9 +15,15 @@ class GroupMessageCard extends StatelessWidget {
   const GroupMessageCard(
       {super.key, required this.message, required this.selected});
 
+  bool isArabic(String text) {
+    return RegExp(r'[\u0600-\u06FF]').hasMatch(text);
+  }
+
   @override
   Widget build(BuildContext context) {
     bool isMe = message.fromId == FirebaseAuth.instance.currentUser!.uid;
+    bool messageIsArabic = isArabic(message.msg!);
+
     return StreamBuilder(
       stream: FirebaseFirestore.instance
           .collection('users')
@@ -40,10 +45,6 @@ class GroupMessageCard extends StatelessWidget {
               mainAxisAlignment:
                   isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
               children: [
-                // isMe
-                //     ? IconButton(
-                //         onPressed: () {}, icon: const Icon(Iconsax.message_edit))
-                //     : const SizedBox(),
                 Card(
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.only(
@@ -93,7 +94,12 @@ class GroupMessageCard extends StatelessWidget {
                                         ),
                                       )),
                                 )
-                              : Text(message.msg!),
+                              : Text(
+                                  message.msg!,
+                                  textDirection: messageIsArabic
+                                      ? TextDirection.rtl
+                                      : TextDirection.ltr,
+                                ),
                           const SizedBox(
                             height: 4,
                           ),
@@ -111,7 +117,7 @@ class GroupMessageCard extends StatelessWidget {
                                 width: 6,
                               ),
                               Text(
-                                myDateTime.onlyTime(message.createdAt!),
+                                MyDateTime.onlyTime(message.createdAt!),
                                 style: Theme.of(context).textTheme.labelSmall,
                               ),
                             ],

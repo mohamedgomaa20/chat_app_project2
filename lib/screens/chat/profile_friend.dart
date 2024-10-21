@@ -1,4 +1,4 @@
-import 'dart:io';
+
 
 import 'package:chat_app_project/models/user_model.dart';
 import 'package:chat_app_project/utils/date_time.dart';
@@ -177,7 +177,7 @@ class _ProfileFriendScreenState extends State<ProfileFriendScreen> {
                                   leading: const Icon(Iconsax.timer_1),
                                   title: const Text("Joined On"),
                                   subtitle: Text(
-                                      '${myDateTime.dateAndTime(user.createdAt!)} at ${myDateTime.onlyTime(widget.chatUser.createdAt!)}')),
+                                      '${MyDateTime.dateAndTime(user.createdAt!)} at ${MyDateTime.onlyTime(widget.chatUser.createdAt!)}')),
                             ),
                             const SizedBox(
                               height: 20,

@@ -36,7 +36,6 @@ class ChatScreen extends StatefulWidget {
 
 TextEditingController messageCon = TextEditingController();
 ScrollController controller = ScrollController();
-bool isLoading = false;
 
 class _ChatScreenState extends State<ChatScreen> {
   List<String> selectedMsg = [];
@@ -45,6 +44,7 @@ class _ChatScreenState extends State<ChatScreen> {
   bool isEditing = false;
   String? editingMessageId;
   bool messageFromMe = false;
+  bool isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -53,19 +53,19 @@ class _ChatScreenState extends State<ChatScreen> {
       child: Scaffold(
         appBar: AppBar(
           automaticallyImplyLeading: false,
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              InkWell(
-                  onTap: () {
-                    Navigator.pop(context);
-                  },
-                  child: const Icon(Icons.arrow_back)),
-              const Gap(5),
-              selectedMsg.isEmpty
-                  ? StreamBuilder(
+          title: selectedMsg.isEmpty
+              ? Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    InkWell(
+                        onTap: () {
+                          Navigator.pop(context);
+                        },
+                        child: const Icon(Icons.arrow_back)),
+                    const Gap(5),
+                    StreamBuilder(
                       stream: FirebaseFirestore.instance
                           .collection('users')
                           .doc(widget.chatUser.id)
@@ -96,7 +96,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                   Text(
                                     user.online!
                                         ? "Active Now"
-                                        : "Last Seen ${myDateTime.dateAndTime(widget.chatUser.lastActivated!)} at ${myDateTime.onlyTime(widget.chatUser.lastActivated!)}",
+                                        : "Last Seen ${MyDateTime.dateAndTime(widget.chatUser.lastActivated!)} at ${MyDateTime.onlyTime(widget.chatUser.lastActivated!)}",
                                     style:
                                         Theme.of(context).textTheme.labelSmall,
                                   ),
@@ -109,9 +109,13 @@ class _ChatScreenState extends State<ChatScreen> {
                         }
                       },
                     )
-                  : Container()
-            ],
-          ),
+                  ],
+                )
+              : InkWell(
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Icon(Icons.close)),
           actions: [
             Row(
               children: [
@@ -132,39 +136,44 @@ class _ChatScreenState extends State<ChatScreen> {
                     ? IconButton(
                         onPressed: () {
                           showAlertDialog(
-                              context: context,
-                              content:
-                                  "Are you sure you want to delete this message? This action cannot be undone.",
-                              txtNo: "Cancel",
-                              txtYes: "Delete",
-                              onPressedYes: () {
-                                FireData()
-                                    .deleteMessage(widget.roomId, selectedMsg)
-                                    .then(
-                                  (value) {
-                                    Navigator.pop(context);
-
-                                    showSnackBar(
-                                        context: context,
-                                        message:
-                                            "Message deleted successfully.");
-                                    setState(() {
-                                      copyMsg.clear();
-                                      selectedMsg.clear();
-                                      editingMessageId = null;
-                                      isEditing = false;
-                                      editMessageId = [];
-                                    });
-                                  },
-                                ).onError(
-                                  (error, stackTrace) {
-                                    showSnackBar(
-                                        context: context,
-                                        message:
-                                            "An error occurred while trying to delete the message.");
-                                  },
-                                );
+                            context: context,
+                            content:
+                                "Are you sure you want to delete this message? This action cannot be undone.",
+                            txtNo: "Cancel",
+                            txtYes: "Delete",
+                            onPressedYes: () {
+                              Navigator.pop(context); // Close the dialog
+                              setState(() {
+                                isLoading = true; // Start loading
                               });
+
+                              FireData()
+                                  .deleteMessage(widget.roomId, selectedMsg)
+                                  .then((value) {
+                                showSnackBar(
+                                  context: context,
+                                  message: "Message deleted successfully.",
+                                );
+                                setState(() {
+                                  copyMsg.clear();
+                                  selectedMsg.clear();
+                                  editingMessageId = null;
+                                  isEditing = false;
+                                  editMessageId = [];
+                                });
+                              }).catchError((error) {
+                                showSnackBar(
+                                  context: context,
+                                  message:
+                                      "An error occurred while trying to delete the message.",
+                                );
+                              }).whenComplete(() {
+                                setState(() {
+                                  isLoading = false; // Stop loading
+                                });
+                              });
+                            },
+                          );
                         },
                         icon: const Icon(Iconsax.trash),
                       )
@@ -256,14 +265,14 @@ class _ChatScreenState extends State<ChatScreen> {
 
                                 if ((index == 0 && messageList.length == 1) ||
                                     index == messageList.length - 1) {
-                                  newDate = myDateTime.dateAndTime(
+                                  newDate = MyDateTime.dateAndTime(
                                       messageList[index].createdAt!);
                                 } else {
                                   final DateTime dateThisMsg =
-                                      myDateTime.dateFormat(
+                                      MyDateTime.dateFormat(
                                           messageList[index].createdAt!);
                                   final DateTime datePreviousMsg =
-                                      myDateTime.dateFormat(
+                                      MyDateTime.dateFormat(
                                           messageList[index + 1].createdAt!);
 
                                   isSameDate = dateThisMsg
@@ -271,7 +280,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
                                   newDate = isSameDate
                                       ? ""
-                                      : myDateTime.dateAndTime(
+                                      : MyDateTime.dateAndTime(
                                           messageList[index].createdAt!);
                                 }
 
@@ -370,6 +379,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   ),
                   // Message input field
                   TextFieldForMessage(
+                    isEditing: isEditing,
                     onPressed: () async {
                       if (messageCon.text.trim().isNotEmpty) {
                         if (isEditing) {
@@ -380,7 +390,9 @@ class _ChatScreenState extends State<ChatScreen> {
                             editMessage: messageCon.text.trim(),
                           )
                               .then((value) {
-                            print("------------- Message Updated -----------");
+                            showSnackBar(
+                                context: context, message: 'Message Updated');
+
                             setState(() {
                               isEditing = false;
                               editingMessageId = null;
@@ -399,8 +411,12 @@ class _ChatScreenState extends State<ChatScreen> {
                           )
                               .then((value) {
                             messageCon.clear();
-                            print(
-                                "------------- Send Message Done -----------");
+                          }).onError((error, stackTrace) {
+                            showSnackBar(
+                              context: context,
+                              message:
+                                  "An error occurred while sending the message.",
+                            );
                           });
                         }
                       }

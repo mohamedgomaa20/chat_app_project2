@@ -32,7 +32,7 @@ class FireAuth {
     }
   }
 
-  Future getToken(String token) async {
+  Future updateToken(String token) async {
     await FirebaseFirestore.instance
         .collection('users')
         .doc(FirebaseAuth.instance.currentUser!.uid)
