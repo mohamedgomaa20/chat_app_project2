@@ -5,10 +5,15 @@ import 'package:chat_app_project/firebase/fire_storage.dart';
 import 'package:chat_app_project/layout.dart';
 import 'package:chat_app_project/models/user_model.dart';
 import 'package:chat_app_project/provider/provider.dart';
+import 'package:chat_app_project/widgets/custom_elevated_button.dart';
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+
+import '../../utils/constants.dart';
+import '../../utils/date_time.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -41,10 +46,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
         title: const Text("Profile"),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(20.0),
+        padding: const EdgeInsets.all(kPadding),
         child: SingleChildScrollView(
           child: Column(
             children: [
+              Gap(20),
               Center(
                 child: Stack(
                   clipBehavior: Clip.none,
@@ -53,7 +59,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ? me!.image == ""
                             ? const CircleAvatar(
                                 radius: 80,
-                      child: Icon(Iconsax.user,size: 60,),
+                                child: Icon(
+                                  Iconsax.user,
+                                  size: 60,
+                                ),
                               )
                             : CircleAvatar(
                                 radius: 80,
@@ -89,7 +98,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ],
                 ),
               ),
-              SizedBox(
+              const SizedBox(
                 height: 20,
               ),
               Card(
@@ -101,11 +110,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           nameEdit = true;
                         });
                       },
-                      icon: Icon(Iconsax.edit)),
+                      icon: const Icon(Iconsax.edit)),
                   title: TextField(
                     controller: nameCon,
                     enabled: nameEdit,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: "Name",
                       border: InputBorder.none,
                     ),
@@ -114,20 +123,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               Card(
                 child: ListTile(
-                  leading: Icon(Iconsax.information),
+                  leading: const Icon(Iconsax.information),
                   trailing: IconButton(
                       onPressed: () {
                         setState(() {
                           aboutEdit = true;
                         });
                       },
-                      icon: Icon(Iconsax.edit)),
+                      icon: const Icon(Iconsax.edit)),
                   title: TextField(
                     controller: aboutCon,
                     enabled: aboutEdit,
                     maxLines: 4,
                     minLines: 1,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: "About",
                       border: InputBorder.none,
                     ),
@@ -136,56 +145,45 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               Card(
                 child: ListTile(
-                    leading: Icon(Iconsax.direct),
-                    title: Text("Email"),
+                    leading: const Icon(Iconsax.direct),
+                    title: const Text("Email"),
                     subtitle: Text(me!.email!)),
               ),
               Card(
                 child: ListTile(
                     leading: Icon(Iconsax.timer_1),
-                    title: Text("Joined On"),
-                    subtitle: Text(me!.createdAt!)),
+                    title: const Text("Joined On"),
+                    subtitle: Text(myDateTime.dateAndTime(me!.createdAt!) +
+                        ' at ' +
+                        myDateTime.onlyTime(me!.createdAt!))),
               ),
-              SizedBox(
+              const SizedBox(
                 height: 20,
               ),
-              ElevatedButton(
-                onPressed: () {
-                  if (nameCon.text.isNotEmpty && aboutCon.text.isNotEmpty) {
-                    FireData()
-                        .editProfile(
-                            newName: nameCon.text, about: aboutCon.text)
-                        .then(
-                      (value) {
-                        Provider.of<ProviderApp>(context, listen: false)
-                            .getUserDetails();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text("Profile updated")));
-                        Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const LayoutApp(),
-                          ),
-                          (route) => false,
-                        );
-                      },
-                    );
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                  backgroundColor:
-                      Theme.of(context).colorScheme.primaryContainer,
-                  padding: const EdgeInsets.all(16),
-                ),
-                child: Center(
-                  child: Text(
-                    "Save".toUpperCase(),
-                    // style: const TextStyle(color: Colors.black),
-                  ),
-                ),
-              ),
+              CustomElevatedButton(
+                  text: 'save',
+                  onPressed: () {
+                    if (nameCon.text.isNotEmpty && aboutCon.text.isNotEmpty) {
+                      FireData()
+                          .editProfile(
+                              newName: nameCon.text, about: aboutCon.text)
+                          .then(
+                        (value) {
+                          Provider.of<ProviderApp>(context, listen: false)
+                              .getUserDetails();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text("Profile updated")));
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const LayoutApp(),
+                            ),
+                            (route) => false,
+                          );
+                        },
+                      );
+                    }
+                  }),
             ],
           ),
         ),

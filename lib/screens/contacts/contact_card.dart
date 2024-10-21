@@ -6,16 +6,16 @@ import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 
 class ContactCard extends StatelessWidget {
-  ChatUser user;
+ final ChatUser user;
 
-  ContactCard({super.key, required this.user});
+ const ContactCard({super.key, required this.user});
 
   @override
   Widget build(BuildContext context) {
     return Card(
       child: ListTile(
         leading: user.image == ""
-            ? CircleAvatar(
+            ? const CircleAvatar(
                 radius: 30,
                 child: Icon(Iconsax.user),
               )
@@ -24,7 +24,7 @@ class ContactCard extends StatelessWidget {
                 backgroundImage: NetworkImage(user.image!),
               ),
         title: Text(user.name.toString()),
-        subtitle: Text(user.about.toString()),
+        subtitle: Text(user.email.toString()),
         trailing: IconButton(
           onPressed: () {
             List<String> members = [

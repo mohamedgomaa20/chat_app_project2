@@ -1,12 +1,14 @@
 import 'package:chat_app_project/firebase/fire_database.dart';
 import 'package:chat_app_project/models/user_model.dart';
 import 'package:chat_app_project/screens/contacts/contact_card.dart';
+import 'package:chat_app_project/widgets/custom_elevated_button.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 
-import '../../widgets/text_field.dart';
+import '../../utils/constants.dart';
+import '../../widgets/text_form_field.dart';
 
 class ContactHomeScreen extends StatefulWidget {
   const ContactHomeScreen({super.key});
@@ -70,7 +72,7 @@ class _ContactHomeScreenState extends State<ContactHomeScreen> {
             context: context,
             builder: (context) {
               return Container(
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(kPadding),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -87,34 +89,32 @@ class _ContactHomeScreenState extends State<ContactHomeScreen> {
                         )
                       ],
                     ),
-                    CustomField(
+                    CustomTextFormField(
                       controller: emailCon,
-                      icon: Iconsax.direct,
-                      lable: "Email",
+                      prefixIcon: Iconsax.direct,
+                      label: "Email",
+                      keyboardType: TextInputType.emailAddress,
                     ),
                     const SizedBox(
                       height: 16,
                     ),
-                    ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.all(16),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12)),
-                            backgroundColor:
-                                Theme.of(context).colorScheme.primaryContainer),
-                        onPressed: () async {
-                          await FireData().addContact(emailCon.text).then(
-                            (value) {
-                              setState(() {
-                                emailCon.clear();
-                                Navigator.pop(context);
-                              });
-                            },
-                          );
-                        },
-                        child: const Center(
-                          child: Text("Add Contact"),
-                        ))
+                    CustomElevatedButton(
+                      text: "Add Contact",
+                      onPressed: () async {
+                        await FireData().addContact(emailCon.text).then(
+                          (value) {
+                            setState(() {
+                              emailCon.clear();
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content:
+                                          Text("Contact added successfully")));
+                              Navigator.pop(context);
+                            });
+                          },
+                        );
+                      },
+                    )
                   ],
                 ),
               );
@@ -124,7 +124,7 @@ class _ContactHomeScreenState extends State<ContactHomeScreen> {
         child: const Icon(Iconsax.user_add),
       ),
       body: Padding(
-          padding: const EdgeInsets.all(20.0),
+          padding: const EdgeInsets.all(kPadding),
           child: Column(
             children: [
               Expanded(
@@ -146,7 +146,14 @@ class _ContactHomeScreenState extends State<ContactHomeScreen> {
                                       myContacts.isEmpty ? [''] : myContacts)
                               .snapshots(),
                           builder: (context, snapshot) {
-                            if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return const Center(
+                                child: CircularProgressIndicator(),
+                              );
+                            }
+                            if (!snapshot.hasData ||
+                                snapshot.data!.docs.isEmpty) {
                               return const Center(
                                 child: Text('No Contacts available.'),
                               );

@@ -1,11 +1,18 @@
+import 'dart:io';
+
 import 'package:chat_app_project/firebase/fire_database.dart';
+import 'package:chat_app_project/utils/constants.dart';
+import 'package:chat_app_project/utils/show_snack_bar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
 
+import '../../firebase/fire_storage.dart';
 import '../../models/user_model.dart';
-import '../../widgets/text_field.dart';
+import '../../widgets/text_form_field.dart';
 
 class CreateGroupScreen extends StatefulWidget {
   const CreateGroupScreen({super.key});
@@ -17,39 +24,78 @@ class CreateGroupScreen extends StatefulWidget {
 class _CreateGroupScreenState extends State<CreateGroupScreen> {
   TextEditingController gNameCon = TextEditingController();
   List<String> gMembers = [];
+  String _groupImage = '';
+  bool isLoading = false;
+  File? _selectedImage;
+
+  Future<void> _pickImage() async {
+    final pickedFile =
+        await ImagePicker().pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      setState(() {
+        _selectedImage = File(pickedFile.path);
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        floatingActionButton: gMembers.isNotEmpty
+    return ModalProgressHUD(
+      inAsyncCall: isLoading,
+      child: Scaffold(
+        floatingActionButton: gMembers.isNotEmpty && gNameCon.text.isNotEmpty
             ? FloatingActionButton.extended(
                 onPressed: () async {
-             if(gNameCon.text.isNotEmpty){
-               await FireData().createGroup(gNameCon.text, gMembers).then(
-                     (value) {
-                   print("---------------- Created Done ---------------");
-                   Navigator.pop(context);
-                   ScaffoldMessenger.of(context).showSnackBar(
-                       SnackBar(content: Text("Created Done")));
-                 },
-               ).onError(
-                     (error, stackTrace) {
-                   print("--------------- Error ----------------");
-                   print(error.toString());
-                 },
-               );
-             }
+                  setState(() {
+                    isLoading = true;
+                  });
+                  if (gNameCon.text.isNotEmpty && gMembers.isNotEmpty) {
+                    await FireData().createGroup(gNameCon.text, gMembers).then(
+                      (groupId) async {
+                        if (groupId != null) {
+                          if (_groupImage.isNotEmpty) {
+                            await FireStorage()
+                                .updateGroupImage(
+                                    file: File(_groupImage), groupId: groupId)
+                                .then((value) {})
+                                .onError((error, stackTrace) {
+                              showSnackBar(
+                                  context: context,
+                                  message:
+                                      'Error updating group image: $error');
+                            });
+                          }
+                          showSnackBar(
+                              context: context,
+                              message: "Group Created Successfully");
+                          Navigator.pop(context);
+                        } else {
+                          showSnackBar(
+                              context: context,
+                              message:
+                                  "Error creating group. Please try again.");
+                        }
+                        setState(() {
+                          isLoading = false;
+                        });
+                      },
+                    ).onError((error, stackTrace) {
+                      showSnackBar(
+                          context: context,
+                          message: "Error: ${error.toString()}");
+                    });
+                  }
                 },
-                label: Text("Done"),
-                icon: Icon(Iconsax.tick_circle),
+                label: const Text("Done"),
+                icon: const Icon(Iconsax.tick_circle),
               )
-            : SizedBox(),
+            : const SizedBox(),
         appBar: AppBar(
-          title: Text("Create Group"),
+          title: const Text("Create Group"),
         ),
-        body:
-        Padding(
-          padding: const EdgeInsets.all(20.0),
+        body: Padding(
+          padding: const EdgeInsets.all(kPadding),
           child: Column(
             children: [
               Row(
@@ -60,35 +106,53 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                     child: Stack(
                       clipBehavior: Clip.none,
                       children: [
-                        CircleAvatar(
-                          radius: 40,
-                        ),
+                        _groupImage == ''
+                            ? const CircleAvatar(
+                                radius: 40,
+                                child: Icon(
+                                  Iconsax.user,
+                                  size: 20,
+                                ),
+                              )
+                            : CircleAvatar(
+                                radius: 40,
+                                backgroundImage: FileImage(File(_groupImage)),
+                              ),
                         Positioned(
                             bottom: -10,
                             right: -10,
                             child: IconButton(
-                                onPressed: () {}, icon: Icon(Iconsax.camera)))
+                                onPressed: () async {
+                                  ImagePicker imagePicker = ImagePicker();
+                                  XFile? image = await imagePicker.pickImage(
+                                      source: ImageSource.gallery);
+                                  if (image != null) {
+                                    setState(() {
+                                      _groupImage = image.path;
+                                    });
+                                  }
+                                },
+                                icon: const Icon(
+                                  Iconsax.edit,
+                                  size: 20,
+                                )))
                       ],
                     ),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     width: 16,
                   ),
                   Expanded(
-                    child: CustomField(
+                    child: CustomTextFormField(
                       controller: gNameCon,
-                      icon: Iconsax.user_octagon,
-                      lable: "Group Name",
+                      prefixIcon: Iconsax.user_octagon,
+                      label: "Group Name",
                     ),
                   ),
                 ],
               ),
-              SizedBox(
-                height: 16,
-              ),
-              Divider(),
-              SizedBox(
-                height: 16,
+              const Divider(
+                height: 50,
               ),
               Row(
                 children: [
@@ -97,7 +161,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                   Text("${gMembers.length}"),
                 ],
               ),
-              SizedBox(
+              const SizedBox(
                 height: 16,
               ),
               Expanded(
@@ -108,7 +172,8 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                         .snapshots(),
                     builder: (context, snapshot) {
                       if (snapshot.hasData) {
-                        List myContacts = snapshot.data!.data()!['my_contacts'];
+                        List myContacts =
+                            snapshot.data!.data()?['my_contacts'] ?? [];
 
                         return StreamBuilder(
                           stream: FirebaseFirestore.instance
@@ -120,14 +185,10 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                           builder: (context, snapshot) {
                             if (snapshot.hasData) {
                               List<ChatUser> itemContacts = snapshot.data!.docs
-                                  .map(
-                                    (e) => ChatUser.fromJson(e.data()),
-                                  )
-                                  .where(
-                                    (element) =>
-                                        element.id !=
-                                        FirebaseAuth.instance.currentUser!.uid,
-                                  )
+                                  .map((e) => ChatUser.fromJson(e.data()))
+                                  .where((element) =>
+                                      element.id !=
+                                      FirebaseAuth.instance.currentUser!.uid)
                                   .toList()
                                 ..sort(
                                   (a, b) => a.name!.compareTo(b.name!),
@@ -160,29 +221,26 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                                               gMembers.remove(
                                                   itemContacts[index].id!);
                                             }
-                                            print(gMembers);
                                           });
                                         },
                                       ),
                                     );
-                                    // ContactCard(
-                                    //   user: itemContacts[index],
-                                    // );
-                                    // ChatCard(item: items[index]);
                                   });
                             } else {
-                              return Container();
+                              return const Center(
+                                  child: CircularProgressIndicator());
                             }
                           },
                         );
                       } else {
-                        return Container();
+                        return const Center(child: CircularProgressIndicator());
                       }
                     }),
               )
-
             ],
           ),
-        ));
+        ),
+      ),
+    );
   }
 }

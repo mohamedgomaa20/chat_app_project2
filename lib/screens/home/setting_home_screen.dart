@@ -1,13 +1,18 @@
+import 'package:chat_app_project/firebase/fire_auth.dart';
+
 import 'package:chat_app_project/provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:provider/provider.dart';
 
+import '../../utils/constants.dart';
+import '../../utils/show_alert_dialog.dart';
 import '../auth/login_screen.dart';
-import '../settings/profile.dart';
+import '../settings/my_profile.dart';
+
 import '../settings/qr_code.dart';
 
 class SettingHomeScreen extends StatefulWidget {
@@ -25,24 +30,14 @@ class _SettingHomeScreenState extends State<SettingHomeScreen> {
       appBar: AppBar(
         title: const Text("Settings"),
       ),
-      floatingActionButton: FloatingActionButton(onPressed: () {
-        FirebaseMessaging.instance.requestPermission();
-        FirebaseMessaging.instance.getToken().then((value) {
-          print(value);
-
-        },);
-
-      }
-
-      ),
       body: Padding(
-        padding: const EdgeInsets.all(20.0),
+        padding: const EdgeInsets.all(kPadding),
         child: SingleChildScrollView(
           child: Column(children: [
             ListTile(
               minVerticalPadding: 30,
               leading: provider.me!.image == ""
-                  ? CircleAvatar(
+                  ? const CircleAvatar(
                       radius: 30,
                       child: Icon(
                         Iconsax.user,
@@ -73,7 +68,7 @@ class _SettingHomeScreenState extends State<SettingHomeScreen> {
                 onTap: () => Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => ProfileScreen(),
+                      builder: (context) => const ProfileScreen(),
                     )),
               ),
             ),
@@ -104,14 +99,19 @@ class _SettingHomeScreenState extends State<SettingHomeScreen> {
                     },
                   );
                 },
-                title: Text("Theme"),
-                leading: Icon(Iconsax.color_swatch),
+                title: const Text("Theme"),
+                leading: const Icon(Iconsax.color_swatch),
               ),
             ),
             Card(
               child: ListTile(
-                title: Text("Dark Mode"),
-                leading: Icon(Iconsax.user),
+                title: const Text("Dark Mode"),
+
+                leading: Icon(provider.themeMode == ThemeMode.dark
+                    ? Icons.nights_stay
+                    : Icons.wb_sunny),
+                // leading: Icon(Icons.brightness_6),
+
                 trailing: Switch(
                   value: provider.themeMode == ThemeMode.dark,
                   onChanged: (value) {
@@ -125,63 +125,28 @@ class _SettingHomeScreenState extends State<SettingHomeScreen> {
             Card(
               child: ListTile(
                 onTap: () {
-                  showDialog(
+                  showAlertDialog(
                     context: context,
-                    builder: (context) {
-                      return AlertDialog(
-                        actionsAlignment: MainAxisAlignment.center,
-                        title: Center(
-                          child: Text(
-                            "Are You Sure ?",
-                            style: Theme.of(context).textTheme.titleLarge,
-                          ),
-                        ),
-                        titlePadding: EdgeInsets.all(30),
-                        actions: [
-                          TextButton(
-                            onPressed: () async {
-                              // await FirebaseAuth.instance.signOut().then(
-                              //   (value) {
-                              //     Navigator.pop(context);
-                              //     ScaffoldMessenger.of(context).showSnackBar(
-                              //       SnackBar(content: Text("Sign out Done")),
-                              //     );
-                              //   },
-                              // ).onError(
-                              //   (error, stackTrace) {
-                              //     ScaffoldMessenger.of(context).showSnackBar(
-                              //       SnackBar(content: Text("Sign out Done")),
-                              //     );
-                              //   },
-                              // );
-
-                              await FirebaseAuth.instance
-                                  .signOut()
-                                  .then((value) {
-                                Navigator.pushAndRemoveUntil(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          const LoginScreen()),
-                                  (route) => false,
-                                );
-                              });
-                            },
-                            child: Text("Yes"),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              Navigator.pop(context);
-                            },
-                            child: Text("No"),
-                          ),
-                        ],
-                      );
+                    content: "Log out of your account?",
+                    txtNo: "CANCEL",
+                    txtYes: "LOG OUT",
+                    onPressedYes: () async {
+                      setState(() {
+                        FireAuth().updateActivate(online: false);
+                      });
+                      await FirebaseAuth.instance.signOut().then((value) {
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const LoginScreen()),
+                          (route) => false,
+                        );
+                      });
                     },
                   );
                 },
-                title: Text("Signout"),
-                trailing: Icon(Iconsax.logout_1),
+                title: const Text("Log Out"),
+                trailing: const Icon(Iconsax.logout_1),
               ),
             ),
           ]),
@@ -190,3 +155,4 @@ class _SettingHomeScreenState extends State<SettingHomeScreen> {
     );
   }
 }
+

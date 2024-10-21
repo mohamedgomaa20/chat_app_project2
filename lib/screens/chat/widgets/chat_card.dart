@@ -1,11 +1,11 @@
 import 'package:chat_app_project/models/message_model.dart';
 import 'package:chat_app_project/models/room_model.dart';
 import 'package:chat_app_project/models/user_model.dart';
+import 'package:chat_app_project/screens/chat/widgets/user_avatar.dart';
 import 'package:chat_app_project/utils/date_time.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import '../chat_screen.dart';
 
@@ -44,57 +44,11 @@ class ChatCard extends StatelessWidget {
                 ),
               ),
             ),
-            leading: chatUser.image == ""
-                ? chatUser.online!
-                    ? Stack(
-                        children: [
-                          CircleAvatar(
-                            radius: 30,
-                            child: Text(chatUser.name!.characters.first),
-                          ),
-                          const Positioned(
-                            right: 1,
-                            bottom: 4,
-                            child: CircleAvatar(
-                                radius: 7,
-                                backgroundColor: Colors.white,
-                                child: CircleAvatar(
-                                  radius: 5,
-                                  backgroundColor: Colors.green,
-                                )),
-                          ),
-                        ],
-                      )
-                    : CircleAvatar(
-                        radius: 30,
-                        child: Text(chatUser.name!.characters.first),
-                      )
-                : chatUser.online!
-                    ? Stack(
-                        children: [
-                          CircleAvatar(
-                            radius: 30,
-                            backgroundImage: NetworkImage(chatUser.image!),
-                          ),
-                          const Positioned(
-                            right: 1,
-                            bottom: 4,
-                            child: CircleAvatar(
-                                radius: 7,
-                                backgroundColor: Colors.white,
-                                child: CircleAvatar(
-                                  radius: 5,
-                                  backgroundColor: Colors.green,
-                                )),
-                          ),
-                        ],
-                      )
-                    : CircleAvatar(
-                        radius: 30,
-                        backgroundImage: NetworkImage(chatUser.image!),
-                      ),
+            leading: UserAvatar(
+                name: chatUser.name!,
+                imageUrl: chatUser.image!,
+                online: chatUser.online!),
             title: Text(
-              // snapshot.data!.data()!['name'].toString(),
               chatUser.name!,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -125,13 +79,15 @@ class ChatCard extends StatelessWidget {
                     [];
                 return unReadList.isNotEmpty
                     ? Badge(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        textStyle: TextStyle(fontSize: 16),
+                        padding: const EdgeInsets.symmetric(horizontal: 5),
                         label: Text(unReadList.length.toString()),
-                        largeSize: 30,
+                        largeSize: 25,
+                        // backgroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
+                        backgroundColor:
+                            Theme.of(context).colorScheme.onPrimaryContainer,
                       )
-                    :
-
-                    Column(
+                    : Column(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [

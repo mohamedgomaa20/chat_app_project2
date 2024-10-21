@@ -1,11 +1,14 @@
+import 'package:chat_app_project/utils/show_snack_bar.dart';
+import 'package:chat_app_project/widgets/custom_elevated_button.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:iconsax/iconsax.dart';
 
-import '../../utils/colors.dart';
-import '../../widgets/logo.dart';
-import '../../widgets/text_field.dart';
+import '../../utils/constants.dart';
+
+import '../../widgets/logo_app.dart';
+import '../../widgets/text_form_field.dart';
 
 class ForgetScreen extends StatefulWidget {
   const ForgetScreen({super.key});
@@ -24,73 +27,54 @@ class _ForgetScreenState extends State<ForgetScreen> {
       appBar: AppBar(),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(20.0),
+          padding: const EdgeInsets.all(kPadding),
           child: Form(
             key: formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // const LogoApp(),
-                Gap(50),
-                Image.asset(
-                  "assets/te2.png",
-                  height: 150,
-                  color: kPrimaryColor,
-                ),
+                const Gap(50),
+                const LogoApp(),
                 const SizedBox(
                   height: 20,
                 ),
                 Text(
-                  "Reset Password,",
+                  "Reset Password",
                   style: Theme.of(context).textTheme.headlineLarge,
                 ),
                 Text(
                   "Please Enter Your Email",
                   style: Theme.of(context).textTheme.bodyLarge,
                 ),
-                CustomField(
+                CustomTextFormField(
+                  keyboardType: TextInputType.emailAddress,
                   controller: emailCon,
-                  lable: "Email",
-                  icon: Iconsax.direct,
+                  label: "Email",
+                  prefixIcon: Iconsax.direct,
                 ),
-                const SizedBox(
-                  height: 16,
-                ),
-                ElevatedButton(
-                  onPressed: () async {
-                    if (formKey.currentState!.validate()) {
-                      await FirebaseAuth.instance
-                          .sendPasswordResetEmail(email: emailCon.text)
-                          .then(
-                        (value) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                                content: Text("Email Sent Check You Email.")),
-                          );
-                          Navigator.pop(context);
-                        },
-                      ).onError(
-                        (error, stackTrace) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(error.toString())),
-                          );
-                        },
-                      );
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                    backgroundColor: kPrimaryColor,
-                    padding: const EdgeInsets.all(16),
-                  ),
-                  child: Center(
-                    child: Text(
-                      "Send Email".toUpperCase(),
-                      style: const TextStyle(color: Colors.black),
-                    ),
-                  ),
-                ),
+                const Gap(16),
+                CustomElevatedButton(
+                    text: "Send Email",
+                    onPressed: () async {
+                      if (formKey.currentState!.validate()) {
+                        await FirebaseAuth.instance
+                            .sendPasswordResetEmail(email: emailCon.text)
+                            .then(
+                          (value) {
+                            showSnackBar(
+                                context: context,
+                                message: "Email Sent Check You Email.");
+
+                            Navigator.pop(context);
+                          },
+                        ).onError(
+                          (error, stackTrace) {
+                            showSnackBar(
+                                context: context, message: error.toString());
+                          },
+                        );
+                      }
+                    }),
               ],
             ),
           ),

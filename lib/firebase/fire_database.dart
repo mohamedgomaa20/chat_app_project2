@@ -44,11 +44,29 @@ class FireData {
     }
   }
 
-  Future createGroup(String gName, List members) async {
-    String myUid = FirebaseAuth.instance.currentUser!.uid;
-    String gId = Uuid().v1();
-    members.add(myUid);
-    ChatGroup chatGroup = ChatGroup(
+  // Future createGroup(String gName, List members) async {
+  //   String myUid = FirebaseAuth.instance.currentUser!.uid;
+  //   String gId = Uuid().v1();
+  //   members.add(myUid);
+  //   ChatGroup chatGroup = ChatGroup(
+  //       id: gId,
+  //       name: gName,
+  //       image: "",
+  //       members: members,
+  //       adminsId: [myUid],
+  //       createdAt: timeNow,
+  //       lastMessage: "",
+  //       lastMessageTime: timeNow);
+  //   await firestore.collection('groups').doc(gId).set(chatGroup.toJson());
+  // }
+
+  Future<String?> createGroup(String gName, List<String> members) async {
+    try {
+      String myUid = FirebaseAuth.instance.currentUser!.uid;
+
+      String gId = Uuid().v1();
+      members.add(myUid);
+      ChatGroup chatGroup = ChatGroup(
         id: gId,
         name: gName,
         image: "",
@@ -56,8 +74,18 @@ class FireData {
         adminsId: [myUid],
         createdAt: timeNow,
         lastMessage: "",
-        lastMessageTime: timeNow);
-    await firestore.collection('groups').doc(gId).set(chatGroup.toJson());
+        lastMessageTime: timeNow,
+      );
+
+      await FirebaseFirestore.instance
+          .collection('groups')
+          .doc(gId)
+          .set(chatGroup.toJson());
+      return gId;
+    } catch (e) {
+      print("Error creating group: $e");
+      return null;
+    }
   }
 
   Future addContact(String email) async {
@@ -148,6 +176,22 @@ class FireData {
     );
   }
 
+  Future readMsgGroup({
+    required String groupId,
+    required String msgId,
+  }) async {
+    await firestore
+        .collection('groups')
+        .doc(groupId)
+        .collection('messages')
+        .doc(msgId)
+        .update(
+      {
+        'read': DateTime.now().millisecondsSinceEpoch.toString(),
+      },
+    );
+  }
+
   Future deleteMessage(String roomId, List<String> messages) async {
     for (var element in messages) {
       await firestore
@@ -157,6 +201,45 @@ class FireData {
           .doc(element)
           .delete();
     }
+  }
+
+  Future deleteMsgGroup(String groupId, List<String> messages) async {
+    for (var element in messages) {
+      await firestore
+          .collection('groups')
+          .doc(groupId)
+          .collection('messages')
+          .doc(element)
+          .delete();
+    }
+  }
+
+  Future editMessage(
+      {required String roomId,
+      required String messageId,
+      required String editMessage}) async {
+    await firestore
+        .collection('rooms')
+        .doc(roomId)
+        .collection('messages')
+        .doc(messageId)
+        .update({
+      'message': editMessage,
+    });
+  }
+
+  Future editMsgGroup(
+      {required String groupId,
+      required String messageId,
+      required String editMessage}) async {
+    await firestore
+        .collection('groups')
+        .doc(groupId)
+        .collection('messages')
+        .doc(messageId)
+        .update({
+      'message': editMessage,
+    });
   }
 
   Future editGroup(
@@ -198,10 +281,5 @@ class FireData {
         .update({'name': newName, 'about': about});
   }
 
-
-
   sendNotification() {}
-
-
-
 }

@@ -1,13 +1,14 @@
 import 'package:chat_app_project/models/group_model.dart';
+import 'package:chat_app_project/utils/date_time.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+
 
 import '../group_screen.dart';
 
 class GroupCard extends StatelessWidget {
-  ChatGroup chatGroup;
+ final ChatGroup chatGroup;
 
-  GroupCard({super.key, required this.chatGroup});
+ const GroupCard({super.key, required this.chatGroup});
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +23,7 @@ class GroupCard extends StatelessWidget {
         ),
         leading: chatGroup.image == ""
             ? CircleAvatar(
-          radius: 30,
+                radius: 30,
                 child: Text(chatGroup.name.toString().characters.first),
               )
             : CircleAvatar(
@@ -38,10 +39,8 @@ class GroupCard extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
               ),
         trailing:
-        // Text(chatGroup.lastMessageTime!),
-        Text(DateFormat('h:mm a').format(
-            DateTime.fromMillisecondsSinceEpoch(
-                int.parse(chatGroup.lastMessageTime!)))),
+            // Text(chatGroup.lastMessageTime!),
+            Text(myDateTime.onlyTime(chatGroup.lastMessageTime!)),
       ),
     );
   }

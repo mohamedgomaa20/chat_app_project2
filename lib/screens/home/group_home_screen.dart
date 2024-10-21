@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 
+import '../../utils/constants.dart';
 import '../group/create_group.dart';
 import '../group/widgets/group_card.dart';
 
@@ -23,16 +24,16 @@ class _GroupHomeScreenState extends State<GroupHomeScreen> {
             Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => CreateGroupScreen(),
+                  builder: (context) => const CreateGroupScreen(),
                 ));
           },
-          child: Icon(Iconsax.message_add_1),
+          child: const Icon(Iconsax.message_add_1),
         ),
         appBar: AppBar(
-          title: Text("Groups"),
+          title: const Text("Groups"),
         ),
         body: Padding(
-          padding: const EdgeInsets.all(20.0),
+          padding: const EdgeInsets.all(kPadding),
           child: Column(
             children: [
               Expanded(
@@ -48,7 +49,6 @@ class _GroupHomeScreenState extends State<GroupHomeScreen> {
                         return const Center(
                           child: CircularProgressIndicator(),
                         );
-
                       }
                       if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                         return const Center(

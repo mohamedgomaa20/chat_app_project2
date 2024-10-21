@@ -48,14 +48,35 @@ class FireStorage {
     );
   }
 
+  Future sendGroupImage({
+    required File file,
+    required String groupId,
+  }) async {
+    String ext = file.path.split('.').last;
+
+    final ref = fireStorage
+        .ref()
+        .child('images/$groupId/${DateTime.now().millisecondsSinceEpoch}.$ext');
+
+    await ref.putFile(file);
+
+    String imageUrl = await ref.getDownloadURL();
+    await FireData().sendGMessage(
+      msg: imageUrl,
+      groupId: groupId,
+      type: 'image',
+    );
+  }
+
   Future updateProfileImage({
     required File file,
   }) async {
-    String myId = FirebaseAuth  .instance.currentUser!.uid;
+    String myId = FirebaseAuth.instance.currentUser!.uid;
     String ext = file.path.split('.').last;
 
-    final ref = fireStorage.ref().child(
-        'Profile/$myId/${DateTime.now().millisecondsSinceEpoch}.$ext');
+    final ref = fireStorage
+        .ref()
+        .child('Profile/$myId/${DateTime.now().millisecondsSinceEpoch}.$ext');
 
     await ref.putFile(file);
 
@@ -63,6 +84,26 @@ class FireStorage {
     await FirebaseFirestore.instance
         .collection('users')
         .doc(myId)
+        .update({'image': imageUrl});
+  }
+
+  Future updateGroupImage({
+    required File file,
+    required String groupId,
+  }) async {
+    // String myId = FirebaseAuth  .instance.currentUser!.uid;
+    String ext = file.path.split('.').last;
+
+    final ref = fireStorage
+        .ref()
+        .child('groups/$groupId/${DateTime.now().millisecondsSinceEpoch}.$ext');
+
+    await ref.putFile(file);
+
+    String imageUrl = await ref.getDownloadURL();
+    await FirebaseFirestore.instance
+        .collection('groups')
+        .doc(groupId)
         .update({'image': imageUrl});
   }
 }

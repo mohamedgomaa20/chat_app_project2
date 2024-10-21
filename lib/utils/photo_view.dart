@@ -15,8 +15,11 @@ class _PhotoViewScreenState extends State<PhotoViewScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),
-      body: Container(
-        child: PhotoView(imageProvider: NetworkImage(widget.image)),
+      body: PhotoView(
+        imageProvider: NetworkImage(widget.image),
+        backgroundDecoration: BoxDecoration(
+          color: Theme.of(context).scaffoldBackgroundColor,
+        ),
       ),
     );
   }

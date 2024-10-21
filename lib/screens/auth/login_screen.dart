@@ -1,15 +1,19 @@
+import 'package:chat_app_project/firebase/fire_auth.dart';
+import 'package:chat_app_project/screens/auth/registration.dart';
+import 'package:chat_app_project/widgets/custom_elevated_button.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
-import 'package:provider/provider.dart';
 
 import '../../layout.dart';
-import '../../provider/provider.dart';
-import '../../utils/colors.dart';
-import '../../widgets/logo.dart';
-import '../../widgets/text_field.dart';
+
+import '../../utils/constants.dart';
+
+import '../../utils/show_snack_bar.dart';
+import '../../widgets/logo_app.dart';
+import '../../widgets/text_form_field.dart';
 import 'forget_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -28,50 +32,42 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final formKey = GlobalKey<FormState>();
     return ModalProgressHUD(
       inAsyncCall: isLoading,
       child: Scaffold(
         appBar: AppBar(),
         body: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.all(20.0),
+            padding: const EdgeInsets.all(kPadding),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // const LogoApp(),
                 const Gap(50),
-                Image.asset(
-                  "assets/te2.png",
-                  height: 150,
-                  color: kPrimaryColor,
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
+                const LogoApp(),
+                const Gap(30),
                 Text(
-                  "Welcome Back",
+                  "Welcome back!",
                   style: Theme.of(context).textTheme.headlineLarge,
                 ),
-                // Text(
-                //   "Material Chat App With Mohamed Gomaa",
-                //   style: Theme.of(context).textTheme.bodyLarge,
-                // ),
-
+                Text(
+                  "Please login to your account to continue.",
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
                 Form(
                   key: formKey,
                   child: Column(
                     children: [
-                      CustomField(
+                      CustomTextFormField(
                         controller: emailCon,
-                        lable: "Email",
-                        icon: Iconsax.direct,
+                        label: "Email",
+                        prefixIcon: Iconsax.direct,
+                        keyboardType: TextInputType.emailAddress,
                       ),
-                      CustomField(
+                      CustomTextFormField(
                         controller: passCon,
-                        lable: "Password",
-                        icon: Iconsax.password_check,
-                        isPass: true,
+                        label: "Password",
+                        prefixIcon: Iconsax.password_check,
+                        isPassword: true,
                       ),
                       const SizedBox(
                         height: 16,
@@ -85,7 +81,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => ForgetScreen(),
+                                    builder: (context) => const ForgetScreen(),
                                   ));
                             },
                           )
@@ -94,110 +90,37 @@ class _LoginScreenState extends State<LoginScreen> {
                       const SizedBox(
                         height: 16,
                       ),
-                      ElevatedButton(
+                      CustomElevatedButton(
+                        text: 'Login',
                         onPressed: () async {
                           if (formKey.currentState!.validate()) {
-                            signIn(
-                                email: emailCon.text, password: passCon.text);
-                            // await FirebaseAuth.instance
-                            //     .signInWithEmailAndPassword(
-                            //         email: emailCon.text, password: passCon.text)
-                            //     .then(
-                            //   (value) {
-                            //     print("---------- Login Done -------------");
-                            //   },
-                            // ).onError(
-                            //   (error, stackTrace) {
-                            //     ScaffoldMessenger.of(context).showSnackBar(
-                            //       SnackBar(content: Text(error.toString())),
-                            //     );
-                            //   },
-                            // );
+                            signIn(email: emailCon.text, password: passCon.text)
+                                .then(
+                              (value) {
+                                setState(() {
+                                  FireAuth().updateActivate(online: true);
+                                });
+                              },
+                            );
                           }
                         },
-                        style: ElevatedButton.styleFrom(
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12)),
-                          backgroundColor: kPrimaryColor,
-                          padding: const EdgeInsets.all(16),
-                        ),
-                        child: Center(
-                          child: Text(
-                            "Login".toUpperCase(),
-                            style: const TextStyle(color: Colors.black),
-                          ),
-                        ),
                       ),
-                      const SizedBox(
-                        height: 16,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text("don't have an account ?"),
+                          TextButton(
+                              onPressed: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          const RegistrationScreen(),
+                                    ));
+                              },
+                              child: const Text('Register Now!'))
+                        ],
                       ),
-                      // ElevatedButton(
-                      //   onPressed: () async {
-                      //     if (formKey.currentState!.validate()) {
-                      //       // Sign out any currently logged-in user before creating a new one.
-                      //       await FirebaseAuth.instance.signOut();
-                      //
-                      //       await FirebaseAuth.instance
-                      //           .createUserWithEmailAndPassword(
-                      //           email: emailCon.text, password: passCon.text)
-                      //           .then((value) {
-                      //         emailCon.clear();
-                      //         passCon.clear();
-                      //       }).onError(
-                      //             (error, stackTrace) {
-                      //           ScaffoldMessenger.of(context).showSnackBar(
-                      //             SnackBar(content: Text(error.toString())),
-                      //           );
-                      //         },
-                      //       );
-                      //     }
-                      //   },
-                      //   style: ElevatedButton.styleFrom(
-                      //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      //     backgroundColor: kPrimaryColor,
-                      //     padding: const EdgeInsets.all(16),
-                      //   ),
-                      //   child: Center(
-                      //     child: Text(
-                      //       "Create Account".toUpperCase(),
-                      //       style: const TextStyle(color: Colors.black),
-                      //     ),
-                      //   ),
-                      // ),
-
-                      OutlinedButton(
-                          style: OutlinedButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12)),
-                            padding: const EdgeInsets.all(16),
-                          ),
-                          onPressed: () async {
-                            if (formKey.currentState!.validate()) {
-                              await FirebaseAuth.instance
-                                  .createUserWithEmailAndPassword(
-                                      email: emailCon.text,
-                                      password: passCon.text)
-                                  .then((value) {
-                                emailCon.clear();
-                                passCon.clear();
-                              }).onError(
-                                (error, stackTrace) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text(error.toString())),
-                                  );
-                                },
-                              );
-                            }
-                          },
-                          child: Center(
-                            child: Text(
-                              "Create Account".toUpperCase(),
-                              style: TextStyle(
-                                color:
-                                    Theme.of(context).colorScheme.onBackground,
-                              ),
-                            ),
-                          )),
                     ],
                   ),
                 )
@@ -214,20 +137,43 @@ class _LoginScreenState extends State<LoginScreen> {
       setState(() {
         isLoading = true;
       });
-      final userCredential =
-          await FirebaseAuth.instance.signInWithEmailAndPassword(
+      await FirebaseAuth.instance
+          .signInWithEmailAndPassword(
         email: email,
         password: password,
+      )
+          .then(
+        (value) {
+          emailCon.clear();
+          passCon.clear();
+        },
       );
       Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (context) => LayoutApp()));
+          context, MaterialPageRoute(builder: (context) => const LayoutApp()));
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
-        ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('No user found for that email.')));
+        showSnackBar(
+            context: context, message: 'No user found for that email.');
       } else if (e.code == 'wrong-password') {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text('Wrong password provided for that user.')));
+        showSnackBar(
+            context: context,
+            message: 'Wrong password provided for that user.');
+      } else if (e.code == 'invalid-email') {
+        showSnackBar(
+            context: context,
+            message: 'Invalid email: Please enter a valid email address.');
+      } else if (e.code == 'user-disabled') {
+        showSnackBar(
+            context: context, message: 'This user account has been disabled.');
+      } else if (e.code == 'too-many-requests') {
+        showSnackBar(
+            context: context,
+            message: 'Too many login attempts. Please try again later.');
+      } else if (e.code == 'network-request-failed') {
+        showSnackBar(
+            context: context,
+            message:
+                'Network error: Please check your connection and try again.');
       }
     } catch (e) {
       print("Failed to log in: $e");
@@ -236,26 +182,4 @@ class _LoginScreenState extends State<LoginScreen> {
       isLoading = false;
     });
   }
-
-// Future<void> createAccount(String email, String password, String name) async {
-//   try {
-//     UserCredential userCredential =
-//         await FirebaseAuth.instance.createUserWithEmailAndPassword(
-//       email: email,
-//       password: password,
-//     );
-//
-//     await userCredential.user?.updateProfile(displayName: name);
-//
-//     Provider.of<ProviderApp>(context, listen: false)
-//         .setUser(userCredential.user);
-//
-//     Navigator.pushReplacement(
-//       context,
-//       MaterialPageRoute(builder: (context) => LayoutApp()),
-//     );
-//   } catch (e) {
-//     print("Failed to create account: $e");
-//   }
-// }
 }

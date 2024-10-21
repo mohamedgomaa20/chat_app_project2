@@ -6,7 +6,8 @@ import 'package:flutter/material.dart';
 
 import 'package:gap/gap.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:intl/intl.dart';
+
+import '../../../utils/date_time.dart';
 
 class ChatMessageCard extends StatefulWidget {
   final Message message;
@@ -25,13 +26,16 @@ class ChatMessageCard extends StatefulWidget {
 
 class _ChatMessageCardState extends State<ChatMessageCard> {
   String myId = FirebaseAuth.instance.currentUser!.uid;
+  TextEditingController msgCon = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
-    // bool isMe = message.fromId == FirebaseAuth.instance.currentUser!.uid;
+    bool isMe = widget.message.fromId == FirebaseAuth.instance.currentUser!.uid;
+
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 1),
+      margin: const EdgeInsets.symmetric(vertical: .5),
       decoration: BoxDecoration(
+        // Color of Selected Message
         color: widget.selected
             ? Theme.of(context).colorScheme.inversePrimary
             : Colors.transparent,
@@ -42,14 +46,6 @@ class _ChatMessageCardState extends State<ChatMessageCard> {
             ? MainAxisAlignment.end
             : MainAxisAlignment.start,
         children: [
-          widget.message.fromId == myId
-              ? IconButton(
-                  onPressed: () {},
-                  icon: Icon(
-                    Iconsax.message_edit,
-                  ),
-                )
-              : SizedBox(),
           Card(
             color: widget.message.fromId == myId
                 ? Theme.of(context).colorScheme.primaryContainer
@@ -65,22 +61,23 @@ class _ChatMessageCardState extends State<ChatMessageCard> {
               ),
             ),
             child: Padding(
-              padding: const EdgeInsets.all(12.0),
+              // padding: const EdgeInsets.symmetric(horizontal: 10.0,vertical: 8),
+              padding: const EdgeInsets.all(10),
               child: Container(
                 constraints: BoxConstraints(
-                    maxWidth: MediaQuery.sizeOf(context).width / 2 + 20),
+                    maxWidth: MediaQuery.sizeOf(context).width / 2 + 50),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     widget.message.type == 'image'
                         ? GestureDetector(
-                            child: Container(
-                              // child: Image.network(message.msg.toString()) ,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
                               child: CachedNetworkImage(
                                 imageUrl: widget.message.msg.toString(),
                                 placeholder: (context, url) {
                                   return Container(
-                                    height: 100,
+                                    height: 120,
                                   );
                                 },
                               ),
@@ -93,10 +90,11 @@ class _ChatMessageCardState extends State<ChatMessageCard> {
                                   ),
                                 )),
                           )
-                        : Text(widget.message.msg.toString()),
-                    const Gap(5),
+                        : Text(widget.message.msg!),
+                    const Gap(3),
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.end,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         widget.message.fromId == myId
                             ? Icon(
@@ -106,16 +104,13 @@ class _ChatMessageCardState extends State<ChatMessageCard> {
                                     ? Colors.grey
                                     : Colors.blue,
                               )
-                            : SizedBox(),
-                        Gap(4),
+                            : const SizedBox(),
+                        const Gap(4),
                         Text(
-                          DateFormat('h:mm a').format(
-                              DateTime.fromMillisecondsSinceEpoch(
-                                  int.parse(widget.message.createdAt!))),
+                          myDateTime.onlyTime(widget.message.createdAt!),
                           style: Theme.of(context).textTheme.labelSmall,
                         ),
                       ],
-                      mainAxisSize: MainAxisSize.min,
                     ),
                   ],
                 ),

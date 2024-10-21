@@ -1,14 +1,19 @@
-import 'package:chat_app_project/firebase/fire_database.dart';
-import 'package:chat_app_project/models/group_model.dart';
-import 'package:chat_app_project/screens/home/group_home_screen.dart';
+import 'dart:io';
+import 'package:chat_app_project/utils/constants.dart';
+import 'package:chat_app_project/utils/show_snack_bar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
 
-import '../../layout.dart';
+import '../../firebase/fire_database.dart';
+import '../../firebase/fire_storage.dart';
+import '../../models/group_model.dart';
 import '../../models/user_model.dart';
-import '../../widgets/text_field.dart';
+import '../../widgets/text_form_field.dart';
 
 class EditGroupScreen extends StatefulWidget {
   ChatGroup chatGroup;
@@ -22,10 +27,11 @@ class EditGroupScreen extends StatefulWidget {
 class _EditGroupScreenState extends State<EditGroupScreen> {
   TextEditingController gNameCon = TextEditingController();
   List<String> gMembers = [];
+  File? _selectedImage;
+  bool isLoading = false;
 
   @override
   void initState() {
-    gNameCon.text = widget.chatGroup.name!;
     FirebaseFirestore.instance
         .collection('groups')
         .doc(widget.chatGroup.id)
@@ -33,46 +39,73 @@ class _EditGroupScreenState extends State<EditGroupScreen> {
         .then((snapshot) {
       setState(() {
         widget.chatGroup = ChatGroup.fromJson(snapshot.data()!);
+        gNameCon.text = widget.chatGroup.name!;
       });
     });
 
     super.initState();
   }
 
+  Future<void> _pickImage() async {
+    final pickedFile =
+        await ImagePicker().pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      setState(() {
+        _selectedImage = File(pickedFile.path);
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return ModalProgressHUD(
+      inAsyncCall: isLoading,
+      child: Scaffold(
         floatingActionButton: FloatingActionButton.extended(
-          onPressed: () {
-            FireData()
+          onPressed: () async {
+            setState(() {
+              isLoading = true;
+            });
+
+            if (_selectedImage != null) {
+              await FireStorage().updateGroupImage(
+                file: _selectedImage!,
+                groupId: widget.chatGroup.id!,
+              );
+            }
+
+            await FireData()
                 .editGroup(
-                    groupId: widget.chatGroup.id!,
-                    newGName: gNameCon.text,
-                    members: gMembers)
+              groupId: widget.chatGroup.id!,
+              newGName: gNameCon.text,
+              members: gMembers,
+            )
                 .then(
               (value) {
-                print("------------ edit done ------------");
                 setState(() {
                   widget.chatGroup.members = gMembers;
                 });
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context)
-                    .showSnackBar(const SnackBar(content: Text("Edit Done")));
+                showSnackBar(context: context, message: "Edit Done");
               },
             ).onError(
               (error, stackTrace) {
-                print("------------------ Error ---------------");
+                print("Error: $error");
               },
             );
+            setState(() {
+              isLoading = false;
+            });
           },
-          label: Text("Done"),
-          icon: Icon(Iconsax.tick_circle),
+          label: const Text("Done"),
+          icon: const Icon(Iconsax.tick_circle),
         ),
         appBar: AppBar(
-          title: Text("Edit Group"),
+          title: const Text("Edit Group"),
         ),
         body: Padding(
-          padding: const EdgeInsets.all(20.0),
+          padding: const EdgeInsets.all(kPadding),
           child: Column(
             children: [
               Row(
@@ -85,34 +118,38 @@ class _EditGroupScreenState extends State<EditGroupScreen> {
                       children: [
                         CircleAvatar(
                           radius: 40,
+                          backgroundImage: _selectedImage != null
+                              ? FileImage(_selectedImage!)
+                              : (widget.chatGroup.image!.isNotEmpty
+                                  ? NetworkImage(widget.chatGroup.image!)
+                                  : null) as ImageProvider?,
                         ),
                         Positioned(
-                            bottom: -10,
-                            right: -10,
-                            child: IconButton(
-                                onPressed: () {},
-                                icon: Icon(Icons.add_a_photo)))
+                          bottom: -10,
+                          right: -10,
+                          child: IconButton(
+                            onPressed: _pickImage,
+                            icon: const Icon(
+                              Iconsax.edit,
+                              size: 20,
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ),
-                  SizedBox(
-                    width: 16,
-                  ),
+                  const SizedBox(width: 16),
                   Expanded(
-                    child: CustomField(
+                    child: CustomTextFormField(
                       controller: gNameCon,
-                      icon: Iconsax.user_octagon,
-                      lable: "Group Name",
+                      prefixIcon: Iconsax.user_octagon,
+                      label: "Group Name",
                     ),
                   ),
                 ],
               ),
-              SizedBox(
-                height: 16,
-              ),
-              Divider(),
-              SizedBox(
-                height: 16,
+              const Divider(
+                height: 50,
               ),
               Row(
                 children: [
@@ -121,7 +158,7 @@ class _EditGroupScreenState extends State<EditGroupScreen> {
                   Text("${gMembers.length}"),
                 ],
               ),
-              SizedBox(
+              const SizedBox(
                 height: 16,
               ),
               Expanded(
@@ -148,7 +185,7 @@ class _EditGroupScreenState extends State<EditGroupScreen> {
                                   )
                                   .where(
                                     (element) =>
-                                        element.id !=
+                                        element.id! !=
                                         FirebaseAuth.instance.currentUser!.uid,
                                   )
                                   .where(
@@ -204,6 +241,8 @@ class _EditGroupScreenState extends State<EditGroupScreen> {
               )
             ],
           ),
-        ));
+        ),
+      ),
+    );
   }
 }

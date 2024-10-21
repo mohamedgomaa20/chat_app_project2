@@ -1,6 +1,7 @@
 import 'package:chat_app_project/firebase/fire_database.dart';
 import 'package:chat_app_project/models/group_model.dart';
 import 'package:chat_app_project/models/user_model.dart';
+import 'package:chat_app_project/screens/chat/profile_friend.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -11,7 +12,7 @@ import 'group_edit.dart';
 class GroupMemberScreen extends StatefulWidget {
   const GroupMemberScreen({super.key, required this.chatGroup});
 
-final  ChatGroup chatGroup;
+  final ChatGroup chatGroup;
 
   @override
   State<GroupMemberScreen> createState() => _GroupMemberScreenState();
@@ -75,6 +76,25 @@ class _GroupMemberScreenState extends State<GroupMemberScreen> {
                                   .contains(membersList[index].id);
 
                               return ListTile(
+                                onTap: () {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            ProfileFriendScreen(
+                                                chatUser: membersList[index]),
+                                      ));
+                                },
+                                leading: membersList[index].image == ""
+                                    ? const CircleAvatar(
+                                        radius: 30,
+                                        child: Icon(Iconsax.user),
+                                      )
+                                    : CircleAvatar(
+                                        radius: 30,
+                                        backgroundImage: NetworkImage(
+                                            membersList[index].image!),
+                                      ),
                                 title: Text(membersList[index].name!),
                                 subtitle: memberAdmin
                                     ? const Text(
